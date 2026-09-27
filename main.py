@@ -20,7 +20,23 @@ from vhost import run_vhost
 from signatures import INTERESTING_PATHS, match_path
 
 
-def run_nmap(target: str, port: int | None) -> dict:
+def _parse_ports(spec) -> list[int]:
+    if not spec:
+        return []
+    out = []
+    for part in str(spec).split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            a, b = part.split("-", 1)
+            out.extend(range(int(a), int(b) + 1))
+        else:
+            out.append(int(part))
+    return out
+
+
+def run_nmap(target: str, ports: str | None) -> dict:
     if shutil.which("nmap") is None:
         print("! nmap not found in PATH - skipping nmap scan, using HTTP only.", file=sys.stderr)
         return {"ports": [], "os": "", "address": target}
@@ -29,8 +45,8 @@ def run_nmap(target: str, port: int | None) -> dict:
         tmp_path = tmp.name
 
     cmd = ["nmap", "-sV", "-sC", "-oX", tmp_path]
-    if port:
-        cmd += ["-p", str(port)]
+    if ports:
+        cmd += ["-p", str(ports)]
     cmd.append(target)
 
     print(f"{_DIM}nmap {target}{_RESET}")
@@ -164,10 +180,12 @@ def _load_open_ports(nmap_json: str | None) -> list[int]:
 
 
 def cmd_fingerprint(args: argparse.Namespace) -> None:
-    open_ports = _load_open_ports(args.nmap_json) or [args.port]
-    fp_result = fingerprint_target(args.target, args.port)
-    analysis = analyze(fp_result, open_ports=open_ports)
-    print(render_report(args.target, args.port, fp_result, analysis))
+    ports = _parse_ports(args.port)
+    open_ports = _load_open_ports(args.nmap_json) or ports
+    for port in ports:
+        fp_result = fingerprint_target(args.target, port)
+        analysis = analyze(fp_result, open_ports=open_ports)
+        print(render_report(args.target, port, fp_result, analysis))
 
 
 def cmd_subs(args: argparse.Namespace) -> None:
@@ -309,8 +327,8 @@ def cmd_scan(args: argparse.Namespace) -> None:
         if not args.port:
             print("! --no-nmap requires --port", file=sys.stderr)
             sys.exit(1)
-        open_ports = [args.port]
-        http_ports = [args.port]
+        open_ports = _parse_ports(args.port)
+        http_ports = list(open_ports)
     else:
         nmap_data = run_nmap(args.target, args.port)
         if not nmap_data["ports"]:
@@ -366,7 +384,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_nmap = sub.add_parser("nmap", help="nmap scan only, saves the result as JSON")
     p_nmap.add_argument("--target", help="Target host")
-    p_nmap.add_argument("--port", type=int, help="Scan only this port")
+    p_nmap.add_argument("--port", help="Scan only these ports, comma-separated or ranges (e.g. 80,443,1337 or 8000-8100)")
     p_nmap.add_argument("--from-xml", help="Parse an existing nmap XML instead of a live scan")
     p_nmap.add_argument("-o", "--output", help="Where to save JSON (default <target>.nmap.json)")
     p_nmap.set_defaults(func=cmd_nmap)
@@ -385,13 +403,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_fp = sub.add_parser("fingerprint", help="HTTP fingerprint + report for a single port")
     p_fp.add_argument("--target", required=True, help="Target host")
-    p_fp.add_argument("--port", type=int, required=True, help="Target HTTP port")
+    p_fp.add_argument("--port", required=True, help="Target HTTP port(s), comma-separated (e.g. 80,443,8080)")
     p_fp.add_argument("--nmap-json", help="Previously saved `nmap` result - adds open ports to the analysis")
     p_fp.set_defaults(func=cmd_fingerprint)
 
     p_scan = sub.add_parser("scan", help="nmap + fingerprint in one run (combined mode)")
     p_scan.add_argument("--target", required=True, help="Target host")
-    p_scan.add_argument("--port", type=int, help="Target HTTP port (if omitted, auto-discovered via nmap)")
+    p_scan.add_argument("--port", help="Target port(s), comma-separated (e.g. 80,443,1337); restricts nmap or, with --no-nmap, fingerprinted directly")
     p_scan.add_argument("--no-nmap", action="store_true", help="Do not run nmap (requires --port)")
     p_scan.set_defaults(func=cmd_scan)
 
