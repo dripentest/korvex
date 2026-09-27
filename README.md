@@ -85,8 +85,13 @@ writes its result to the current directory as JSON.
 
 ```bash
 fp scan --target target.thm
-fp scan --target target.thm --port 5000 --no-nmap   # skip nmap, port known
+fp scan --target target.thm --port 5000 --no-nmap        # skip nmap, port known
+fp scan --target target.thm --port 80,443,1337,8000-8100  # custom ports / ranges
 ```
+
+`--port` accepts a comma-separated list and ranges (e.g. `21,22,1337,8000-8100`) in
+`nmap`, `scan` and `fingerprint` — useful when the default top-1000 scan misses a
+non-standard port.
 
 ### `nmap` — ports only
 
@@ -162,13 +167,23 @@ pattern-matched, never executed.
 ### `graph` — interactive attack graph
 
 ```bash
+# single host
 fp graph --target target.thm \
   --nmap-json target.thm.nmap.json \
   --dirs-json target.thm-5000.dirs.json
+
+# whole company: root domain -> subdomains -> their ports -> paths
+fp graph --target example.com \
+  --subs-json example.com.subs.json \
+  --nmap-json app.example.com.nmap.json --nmap-json api.example.com.nmap.json \
+  --dirs-json app.example.com-443.dirs.json --dirs-json api.example.com-443.dirs.json \
+  --passive-json app.example.com-443.passive.json
 ```
 
 Merges saved results (and an optional live fingerprint) into a single self-contained HTML
-file. Open it in any browser — no server required.
+file. `--nmap-json` / `--dirs-json` / `--passive-json` are repeatable and routed to their
+host, so a broad target renders as one graph: the root domain, every discovered subdomain,
+each host's ports, and their paths and vulnerabilities. Open it in any browser — no server required.
 
 **Graph controls:** drag background to pan, wheel to zoom, drag nodes to arrange,
 double-click for details, right-click a node to set status or the background to add a note.
