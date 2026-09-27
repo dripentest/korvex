@@ -78,6 +78,7 @@ def cmd_nmap(args: argparse.Namespace) -> None:
         nmap_data = run_nmap(args.target, args.port)
         target_for_name = args.target
 
+    nmap_data["host"] = target_for_name
     out = args.output or f"{_safe_name(target_for_name)}.nmap.json"
     _save_json(nmap_data, out)
 
@@ -253,35 +254,50 @@ def cmd_passive(args: argparse.Namespace) -> None:
 
 
 def cmd_graph(args: argparse.Namespace) -> None:
-    nmap_data = _load_json_file(args.nmap_json) if args.nmap_json else None
+    subs = _load_json_file(args.subs_json) if args.subs_json else None
 
-    open_ports: list[int] = []
-    http_ports: list[int] = []
-    if nmap_data:
-        open_ports = [p["port"] for p in nmap_data.get("ports", [])]
-        http_ports = [p["port"] for p in nmap_data.get("ports", []) if "http" in p.get("service", "")]
-    for p in args.port or []:
-        if p not in http_ports:
-            http_ports.append(p)
-        if p not in open_ports:
-            open_ports.append(p)
-
-    fingerprints = []
-    if not args.no_fingerprint:
-        if not http_ports:
-            print("! no HTTP ports to fingerprint (provide --port or --nmap-json, or use --no-fingerprint)", file=sys.stderr)
-        for port in http_ports:
-            fp_result = fingerprint_target(args.target, port)
-            analysis = analyze(fp_result, open_ports=open_ports or [port])
-            fingerprints.append((port, fp_result, analysis))
+    nmaps = []
+    for path in args.nmap_json or []:
+        nd = _load_json_file(path)
+        if nd:
+            nmaps.append(nd)
 
     dirs = []
     for path in args.dirs_json or []:
         d = _load_json_file(path)
         if d:
             dirs.append(d)
+    for path in args.passive_json or []:
+        pv = _load_json_file(path)
+        if pv:
+            dirs.append({"target": pv["target"], "found": passive_paths(pv)})
 
-    graph = build_graph(args.target, nmap_data=nmap_data, fingerprints=fingerprints, dirs=dirs)
+    # per-host open-port map (host -> its open ports) for evidence-gating in analyze()
+    host_open: dict[str, list[int]] = {}
+    for nd in nmaps:
+        host = nd.get("host") or nd.get("address") or args.target
+        host_open.setdefault(host, []).extend(p["port"] for p in nd.get("ports", []))
+
+    fingerprints = []
+    if not args.no_fingerprint:
+        jobs = []
+        for nd in nmaps:
+            host = nd.get("host") or nd.get("address") or args.target
+            for p in nd.get("ports", []):
+                if "http" in (p.get("service") or ""):
+                    jobs.append((host, p["port"]))
+        for port in args.port or []:
+            jobs.append((args.target, port))
+        seen = set()
+        for host, port in jobs:
+            if (host, port) in seen:
+                continue
+            seen.add((host, port))
+            fp_result = fingerprint_target(host, port)
+            analysis = analyze(fp_result, open_ports=host_open.get(host) or [port])
+            fingerprints.append((host, port, fp_result, analysis))
+
+    graph = build_graph(args.target, subs=subs, nmap=nmaps, fingerprints=fingerprints, dirs=dirs)
     out = args.output or f"{_safe_name(args.target)}.graph.html"
     render_to_file(graph, args.target, out)
     print(f"graph  {out}   {_DIM}{len(graph['nodes'])} nodes, {len(graph['edges'])} edges{_RESET}")
@@ -402,12 +418,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_pass.add_argument("--graph", action="store_true", help="Also build an HTML graph from discovered paths")
     p_pass.set_defaults(func=cmd_passive)
 
-    p_graph = sub.add_parser("graph", help="Build the interactive HTML graph from saved results (nmap/dirs) + fingerprint")
-    p_graph.add_argument("--target", required=True, help="Target host (graph root)")
-    p_graph.add_argument("--nmap-json", help="Saved `nmap` result (ports)")
-    p_graph.add_argument("--dirs-json", action="append", help="Saved `dirs` result (may be given multiple times)")
-    p_graph.add_argument("--port", type=int, action="append", help="HTTP port to fingerprint (repeatable; otherwise HTTP ports from nmap-json)")
-    p_graph.add_argument("--no-fingerprint", action="store_true", help="No HTTP requests - build the graph from nmap/dirs only")
+    p_graph = sub.add_parser("graph", help="Build the interactive HTML graph from saved results (subs/nmap/dirs/passive) + fingerprint")
+    p_graph.add_argument("--target", required=True, help="Root domain (graph root)")
+    p_graph.add_argument("--subs-json", help="Saved `subs` result — adds subdomains under the root")
+    p_graph.add_argument("--nmap-json", action="append", help="Saved `nmap` result (repeatable; routed to its host)")
+    p_graph.add_argument("--dirs-json", action="append", help="Saved `dirs` result (repeatable; routed to its host)")
+    p_graph.add_argument("--passive-json", action="append", help="Saved `passive` result (repeatable; routed to its host)")
+    p_graph.add_argument("--port", type=int, action="append", help="HTTP port on --target to fingerprint (repeatable)")
+    p_graph.add_argument("--no-fingerprint", action="store_true", help="No HTTP requests - build the graph from saved data only")
     p_graph.add_argument("-o", "--output", help="Output HTML (default <target>.graph.html)")
     p_graph.set_defaults(func=cmd_graph)
 

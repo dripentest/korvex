@@ -173,7 +173,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
   <div class="nbf"><button class="b nbcancel" id="cfno">Cancel</button><button class="b nbsave" id="cfyes">Confirm</button></div>
 </div></div>
 <div id="legend">
-  <div class="lg"><span class="sw" style="background:#5b8def"></span> Target / port</div>
+  <div class="lg"><span class="sw" style="background:#5b8def"></span> Target · <span class="sw" style="background:#7d8cff"></span> Subdomain · <span class="sw" style="background:#3a4250"></span> Port</div>
   <div class="lg"><span class="sw" style="background:#38b2c4"></span> Stack / DB</div>
   <div class="lg"><span class="sw" style="background:#d7263d"></span> CRITICAL · <span class="sw" style="background:#f46036"></span> HIGH · <span class="sw" style="background:#ffc857"></span> MED</div>
   <div class="lg"><span class="sw" style="background:#1f6d43"></span> Path · <span class="sw" style="background:#c9932b"></span> Auth-gated · <span class="sw" style="background:#232a38"></span> Other (hub)</div>
@@ -190,8 +190,8 @@ const LSKEY="fingerprint-graph:"+TARGET;
 document.getElementById("tgt").textContent=TARGET;
 
 const PRIORITY_COLORS={CRITICAL:"#d7263d",HIGH:"#f46036",MEDIUM:"#ffc857",LOW:"#2a9d8f"};
-const TYPE_COLORS={target:"#5b8def",port:"#3a4250",stack:"#38b2c4",db:"#7a49c9",waf:"#8a4a12",path:"#1f6d43",gated:"#c9932b",hub:"#232a38",vuln:"#3a4250"};
-const TYPE_LABEL={target:"TARGET",port:"PORT",stack:"STACK",db:"DATABASE",waf:"WAF",path:"PATH",gated:"AUTH-GATED (30x/401/403)",hub:"HUB",vuln:"HYPOTHESIS"};
+const TYPE_COLORS={target:"#5b8def",subdomain:"#7d8cff",port:"#3a4250",stack:"#38b2c4",db:"#7a49c9",waf:"#8a4a12",path:"#1f6d43",gated:"#c9932b",hub:"#232a38",vuln:"#3a4250"};
+const TYPE_LABEL={target:"TARGET",subdomain:"SUBDOMAIN",port:"PORT",stack:"STACK",db:"DATABASE",waf:"WAF",path:"PATH",gated:"AUTH-GATED (30x/401/403)",hub:"HUB",vuln:"HYPOTHESIS"};
 
 const byId={};GRAPH.nodes.forEach(n=>byId[n.id]=n);
 

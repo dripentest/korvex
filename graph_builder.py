@@ -12,6 +12,7 @@ PRIORITY_COLORS = {
 
 TYPE_COLORS = {
     "target": "#5b8def",
+    "subdomain": "#7d8cff",
     "port": "#3a4250",
     "stack": "#38b2c4",
     "db": "#7a49c9",
@@ -20,6 +21,8 @@ TYPE_COLORS = {
     "gated": "#c9932b",
     "hub": "#232a38",
 }
+
+_NOWEB_COLOR = "#3a4250"
 
 _REDIRECT_MARK = " → "
 REDIRECT_STATUSES = {301, 302, 303, 307, 308}
@@ -108,33 +111,50 @@ def _port_from_url(url: str) -> int | None:
         return None
 
 
-def _ensure_port(g: _Graph, root: str, port: int | None) -> str:
-    if port is None:
+def _host_from_url(url: str) -> str | None:
+    try:
+        return urlsplit(url).hostname
+    except ValueError:
+        return None
+
+
+def _host_anchor(g: _Graph, root: str, host: str | None, target: str) -> str:
+    if not host or host == target:
         return root
-    pid = g.node(f"port:{port}", "port", str(port), port=port)
-    g.edge(root, pid)
+    hid = g.node(f"host:{host}", "subdomain", host, host=host)
+    g.edge(root, hid)
+    return hid
+
+
+def _ensure_port(g: _Graph, anchor: str, port: int | None) -> str:
+    if port is None:
+        return anchor
+    pid = g.node(f"{anchor}::port:{port}", "port", str(port), port=port)
+    g.edge(anchor, pid)
     return pid
 
 
 def _add_fingerprint(g: _Graph, anchor: str, fp_result: dict, analysis: dict) -> None:
     stacks: list[str] = []
+    stack_ids: dict[str, str] = {}
     for m in analysis.get("matches", []):
         if m["stack"] in stacks:
             continue
         stacks.append(m["stack"])
         sid = g.node(
-            f"stack:{_slug(m['stack'])}",
+            f"{anchor}::stack:{_slug(m['stack'])}",
             "stack",
             m["stack"],
             confidence=analysis.get("confidence"),
             source=m.get("source"),
         )
+        stack_ids[m["stack"]] = sid
         g.edge(anchor, sid)
 
     def attach(dst: str) -> None:
         if stacks:
             for s in stacks:
-                g.edge(f"stack:{_slug(s)}", dst)
+                g.edge(stack_ids[s], dst)
         else:
             g.edge(anchor, dst)
 
@@ -168,7 +188,7 @@ def _path_node(g: _Graph, anchor: str, path: str, status=None, sig=None, kind=No
     note = INTERESTING_PATHS.get(path)
     hyps = _refine_hyps(sig["hypotheses"], kind) if sig else None
     pid = g.node(
-        f"path:{path}",
+        f"{anchor}::path:{path}",
         "path",
         f"{path}\n{status}" if status is not None else path,
         path=path,
@@ -199,7 +219,7 @@ def _add_paths(g: _Graph, anchor: str, found: list[dict], kind: str | None = Non
             _path_node(g, anchor, path, status, sig=sig, kind=kind)
         elif status in GATED_STATUSES:
             rid = g.node(
-                f"gated:{path}",
+                f"{anchor}::gated:{path}",
                 "gated",
                 f"{path}\n{status} {_gated_hint(status)}",
                 path=path,
@@ -222,31 +242,51 @@ def _add_paths(g: _Graph, anchor: str, found: list[dict], kind: str | None = Non
 def build_graph(
     target: str,
     *,
-    nmap_data: dict | None = None,
-    fingerprints: list[tuple[int, dict, dict]] | None = None,
+    subs: dict | None = None,
+    nmap: list[dict] | None = None,
+    fingerprints: list[tuple] | None = None,
     dirs: list[dict] | None = None,
 ) -> dict:
     g = _Graph()
     root = g.node("target", "target", target)
 
-    if nmap_data:
-        for p in nmap_data.get("ports", []):
+    if subs:
+        for e in subs.get("live", []):
+            sd = e["subdomain"]
+            label = f"{sd}\n{e.get('status', '')} {e.get('scheme', '')}".strip()
+            g.node(f"host:{sd}", "subdomain", label, host=sd,
+                   status=e.get("status"), scheme=e.get("scheme"), ips=e.get("ips"))
+            g.edge(root, f"host:{sd}")
+        for e in subs.get("resolved_no_web", []):
+            sd = e["subdomain"]
+            g.node(f"host:{sd}", "subdomain", f"{sd}\n(no web)", host=sd,
+                   ips=e.get("ips"), color=_NOWEB_COLOR)
+            g.edge(root, f"host:{sd}")
+
+    for nd in (nmap or []):
+        host = nd.get("host") or nd.get("address") or target
+        anchor = _host_anchor(g, root, host, target)
+        for p in nd.get("ports", []):
             label = f"{p['port']}/{p['service']}" if p.get("service") else str(p["port"])
             if p.get("version"):
                 label += f"\n{p['version']}"
-            pid = g.node(f"port:{p['port']}", "port", label, port=p["port"], service=p.get("service"))
-            g.edge(root, pid)
+            pid = g.node(f"{anchor}::port:{p['port']}", "port", label, port=p["port"], service=p.get("service"))
+            g.edge(anchor, pid)
 
-    port_kind: dict[int, str | None] = {}
-    for port, fp_result, analysis in (fingerprints or []):
-        anchor = _ensure_port(g, root, port)
-        _add_fingerprint(g, anchor, fp_result, analysis)
+    hostport_kind: dict[tuple, str | None] = {}
+    for host, port, fp_result, analysis in (fingerprints or []):
+        anchor = _host_anchor(g, root, host, target)
+        panchor = _ensure_port(g, anchor, port)
+        _add_fingerprint(g, panchor, fp_result, analysis)
         matches = analysis.get("matches", [])
-        port_kind[port] = stack_kind(matches[0]["stack"]) if matches else None
+        hostport_kind[(host, port)] = stack_kind(matches[0]["stack"]) if matches else None
 
     for d in (dirs or []):
-        port = _port_from_url(d.get("target", ""))
-        anchor = _ensure_port(g, root, port)
-        _add_paths(g, anchor, d.get("found", []), kind=port_kind.get(port))
+        url = d.get("target", "")
+        host = _host_from_url(url) or target
+        port = _port_from_url(url)
+        anchor = _host_anchor(g, root, host, target)
+        panchor = _ensure_port(g, anchor, port)
+        _add_paths(g, panchor, d.get("found", []), kind=hostport_kind.get((host, port)))
 
     return g.result()
