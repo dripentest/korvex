@@ -1,0 +1,27 @@
+{
+  "Cloudflare": {
+    "headers": {"server": "cloudflare", "cf-ray": "*"},
+    "cookies": ["__cf_bm", "cf_clearance"],
+    "note": "Find the real origin via certificate transparency, historical DNS, favicon hash"
+  },
+  "Akamai": {
+    "headers": {"server": "akamaighost"},
+    "cookies": ["_abck", "ak_bmsc"]
+  },
+  "Imperva": {
+    "headers": {"x-iinfo": "*"},
+    "cookies": ["visid_incap_", "incap_ses_"]
+  },
+  "Sucuri": {
+    "headers": {"server": "sucuri", "x-sucuri-id": "*"},
+    "cookies": ["sucuri_cloudproxy_uuid"]
+  },
+  "AWS CloudFront": {
+    "headers": {"x-amz-cf-id": "*"},
+    "cookies": ["aws-waf-token"]
+  },
+  "F5 BIG-IP": {
+    "headers": {},
+    "cookies": ["BIGipServer*", "TS*"]
+  }
+}

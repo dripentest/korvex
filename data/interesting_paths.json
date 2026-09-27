@@ -1,0 +1,20 @@
+{
+  "/console": "Werkzeug debug console - RCE if enabled",
+  "/.git/HEAD": "Git exposure - recover repository with git-dumper",
+  "/.env": "Environment file - credentials, SECRET_KEY, API keys",
+  "/robots.txt": "Hidden paths and directories",
+  "/wp-login.php": "WordPress - WPScan, brute-force, vulnerable plugins",
+  "/administrator/": "Joomla admin panel",
+  "/user/login": "Drupal - Drupalgeddon checks",
+  "/actuator": "Spring Boot Actuator - /heapdump /env /jolokia",
+  "/graphql": "GraphQL - introspection, IDOR, injection",
+  "/__pycache__/": "Python bytecode - source code disclosure",
+  "/xmlrpc.php": "WordPress XML-RPC - brute-force, SSRF",
+  "/server-status": "Apache mod_status - information disclosure",
+  "/debug": "Debug endpoint - stack trace and configuration disclosure",
+  "/api/": "API endpoint - fuzz with -mc 200,301,302,401,403",
+  "/swagger-ui.html": "Swagger UI - API documentation, full endpoint list",
+  "/v1/": "API v1 endpoint",
+  "/phpmyadmin/": "phpMyAdmin - default credentials",
+  "/adminer.php": "Adminer - default credentials"
+}

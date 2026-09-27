@@ -1,0 +1,4190 @@
+{
+  "keywords": {
+    "login": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "signin": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "sign-in": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "logon": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "signon": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "log-in": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "authenticate": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "auth": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "authorize": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "authorization": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "authn": {
+      "hypotheses": [
+        "SQL/NoSQL injection (authentication bypass)",
+        "Credential brute-force / password spraying",
+        "Authentication logic flaws"
+      ],
+      "priority": "HIGH"
+    },
+    "oauth": {
+      "hypotheses": [
+        "OAuth redirect_uri manipulation",
+        "Authorization code / token leakage",
+        "Missing state parameter (CSRF)",
+        "SAML assertion / signature tampering"
+      ],
+      "priority": "HIGH"
+    },
+    "oauth2": {
+      "hypotheses": [
+        "OAuth redirect_uri manipulation",
+        "Authorization code / token leakage",
+        "Missing state parameter (CSRF)",
+        "SAML assertion / signature tampering"
+      ],
+      "priority": "HIGH"
+    },
+    "sso": {
+      "hypotheses": [
+        "OAuth redirect_uri manipulation",
+        "Authorization code / token leakage",
+        "Missing state parameter (CSRF)",
+        "SAML assertion / signature tampering"
+      ],
+      "priority": "HIGH"
+    },
+    "saml": {
+      "hypotheses": [
+        "OAuth redirect_uri manipulation",
+        "Authorization code / token leakage",
+        "Missing state parameter (CSRF)",
+        "SAML assertion / signature tampering"
+      ],
+      "priority": "HIGH"
+    },
+    "openid": {
+      "hypotheses": [
+        "OAuth redirect_uri manipulation",
+        "Authorization code / token leakage",
+        "Missing state parameter (CSRF)",
+        "SAML assertion / signature tampering"
+      ],
+      "priority": "HIGH"
+    },
+    "oidc": {
+      "hypotheses": [
+        "OAuth redirect_uri manipulation",
+        "Authorization code / token leakage",
+        "Missing state parameter (CSRF)",
+        "SAML assertion / signature tampering"
+      ],
+      "priority": "HIGH"
+    },
+    "idp": {
+      "hypotheses": [
+        "OAuth redirect_uri manipulation",
+        "Authorization code / token leakage",
+        "Missing state parameter (CSRF)",
+        "SAML assertion / signature tampering"
+      ],
+      "priority": "HIGH"
+    },
+    "federation": {
+      "hypotheses": [
+        "OAuth redirect_uri manipulation",
+        "Authorization code / token leakage",
+        "Missing state parameter (CSRF)",
+        "SAML assertion / signature tampering"
+      ],
+      "priority": "HIGH"
+    },
+    "jwt": {
+      "hypotheses": [
+        "JWT algorithm confusion / weak secret",
+        "JWT claim tampering (privilege escalation)",
+        "Token leakage / predictability"
+      ],
+      "priority": "HIGH"
+    },
+    "token": {
+      "hypotheses": [
+        "JWT algorithm confusion / weak secret",
+        "JWT claim tampering (privilege escalation)",
+        "Token leakage / predictability"
+      ],
+      "priority": "HIGH"
+    },
+    "bearer": {
+      "hypotheses": [
+        "JWT algorithm confusion / weak secret",
+        "JWT claim tampering (privilege escalation)",
+        "Token leakage / predictability"
+      ],
+      "priority": "HIGH"
+    },
+    "refresh": {
+      "hypotheses": [
+        "JWT algorithm confusion / weak secret",
+        "JWT claim tampering (privilege escalation)",
+        "Token leakage / predictability"
+      ],
+      "priority": "HIGH"
+    },
+    "apitoken": {
+      "hypotheses": [
+        "JWT algorithm confusion / weak secret",
+        "JWT claim tampering (privilege escalation)",
+        "Token leakage / predictability"
+      ],
+      "priority": "HIGH"
+    },
+    "api-token": {
+      "hypotheses": [
+        "JWT algorithm confusion / weak secret",
+        "JWT claim tampering (privilege escalation)",
+        "Token leakage / predictability"
+      ],
+      "priority": "HIGH"
+    },
+    "accesstoken": {
+      "hypotheses": [
+        "JWT algorithm confusion / weak secret",
+        "JWT claim tampering (privilege escalation)",
+        "Token leakage / predictability"
+      ],
+      "priority": "HIGH"
+    },
+    "access-token": {
+      "hypotheses": [
+        "JWT algorithm confusion / weak secret",
+        "JWT claim tampering (privilege escalation)",
+        "Token leakage / predictability"
+      ],
+      "priority": "HIGH"
+    },
+    "verify": {
+      "hypotheses": [
+        "Verification bypass (email/token)",
+        "Predictable or unbound verification token",
+        "IDOR"
+      ],
+      "priority": "HIGH"
+    },
+    "verification": {
+      "hypotheses": [
+        "Verification bypass (email/token)",
+        "Predictable or unbound verification token",
+        "IDOR"
+      ],
+      "priority": "HIGH"
+    },
+    "confirm": {
+      "hypotheses": [
+        "Verification bypass (email/token)",
+        "Predictable or unbound verification token",
+        "IDOR"
+      ],
+      "priority": "HIGH"
+    },
+    "confirmation": {
+      "hypotheses": [
+        "Verification bypass (email/token)",
+        "Predictable or unbound verification token",
+        "IDOR"
+      ],
+      "priority": "HIGH"
+    },
+    "activate": {
+      "hypotheses": [
+        "Verification bypass (email/token)",
+        "Predictable or unbound verification token",
+        "IDOR"
+      ],
+      "priority": "HIGH"
+    },
+    "activation": {
+      "hypotheses": [
+        "Verification bypass (email/token)",
+        "Predictable or unbound verification token",
+        "IDOR"
+      ],
+      "priority": "HIGH"
+    },
+    "validate": {
+      "hypotheses": [
+        "Verification bypass (email/token)",
+        "Predictable or unbound verification token",
+        "IDOR"
+      ],
+      "priority": "HIGH"
+    },
+    "reset": {
+      "hypotheses": [
+        "Password reset poisoning",
+        "Host header injection",
+        "Username enumeration"
+      ],
+      "priority": "HIGH"
+    },
+    "reset-password": {
+      "hypotheses": [
+        "Password reset poisoning",
+        "Host header injection",
+        "Username enumeration"
+      ],
+      "priority": "HIGH"
+    },
+    "resetpassword": {
+      "hypotheses": [
+        "Password reset poisoning",
+        "Host header injection",
+        "Username enumeration"
+      ],
+      "priority": "HIGH"
+    },
+    "forgot": {
+      "hypotheses": [
+        "Password reset poisoning",
+        "Host header injection",
+        "Username enumeration"
+      ],
+      "priority": "HIGH"
+    },
+    "forgot-password": {
+      "hypotheses": [
+        "Password reset poisoning",
+        "Host header injection",
+        "Username enumeration"
+      ],
+      "priority": "HIGH"
+    },
+    "forgotpassword": {
+      "hypotheses": [
+        "Password reset poisoning",
+        "Host header injection",
+        "Username enumeration"
+      ],
+      "priority": "HIGH"
+    },
+    "recover": {
+      "hypotheses": [
+        "Password reset poisoning",
+        "Host header injection",
+        "Username enumeration"
+      ],
+      "priority": "HIGH"
+    },
+    "recovery": {
+      "hypotheses": [
+        "Password reset poisoning",
+        "Host header injection",
+        "Username enumeration"
+      ],
+      "priority": "HIGH"
+    },
+    "2fa": {
+      "hypotheses": [
+        "2FA/MFA bypass (step skipping, missing rate-limit, session not bound)"
+      ],
+      "priority": "HIGH"
+    },
+    "mfa": {
+      "hypotheses": [
+        "2FA/MFA bypass (step skipping, missing rate-limit, session not bound)"
+      ],
+      "priority": "HIGH"
+    },
+    "otp": {
+      "hypotheses": [
+        "2FA/MFA bypass (step skipping, missing rate-limit, session not bound)"
+      ],
+      "priority": "HIGH"
+    },
+    "totp": {
+      "hypotheses": [
+        "2FA/MFA bypass (step skipping, missing rate-limit, session not bound)"
+      ],
+      "priority": "HIGH"
+    },
+    "twofactor": {
+      "hypotheses": [
+        "2FA/MFA bypass (step skipping, missing rate-limit, session not bound)"
+      ],
+      "priority": "HIGH"
+    },
+    "two-factor": {
+      "hypotheses": [
+        "2FA/MFA bypass (step skipping, missing rate-limit, session not bound)"
+      ],
+      "priority": "HIGH"
+    },
+    "authenticator": {
+      "hypotheses": [
+        "2FA/MFA bypass (step skipping, missing rate-limit, session not bound)"
+      ],
+      "priority": "HIGH"
+    },
+    "magic-link": {
+      "hypotheses": [
+        "Authentication bypass / user impersonation",
+        "Unbound single-use token"
+      ],
+      "priority": "HIGH"
+    },
+    "magiclink": {
+      "hypotheses": [
+        "Authentication bypass / user impersonation",
+        "Unbound single-use token"
+      ],
+      "priority": "HIGH"
+    },
+    "passwordless": {
+      "hypotheses": [
+        "Authentication bypass / user impersonation",
+        "Unbound single-use token"
+      ],
+      "priority": "HIGH"
+    },
+    "impersonate": {
+      "hypotheses": [
+        "Authentication bypass / user impersonation",
+        "Unbound single-use token"
+      ],
+      "priority": "HIGH"
+    },
+    "loginas": {
+      "hypotheses": [
+        "Authentication bypass / user impersonation",
+        "Unbound single-use token"
+      ],
+      "priority": "HIGH"
+    },
+    "login-as": {
+      "hypotheses": [
+        "Authentication bypass / user impersonation",
+        "Unbound single-use token"
+      ],
+      "priority": "HIGH"
+    },
+    "switch-user": {
+      "hypotheses": [
+        "Authentication bypass / user impersonation",
+        "Unbound single-use token"
+      ],
+      "priority": "HIGH"
+    },
+    "session": {
+      "hypotheses": [
+        "Session fixation",
+        "Predictable session identifier",
+        "Session not invalidated on logout"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sessions": {
+      "hypotheses": [
+        "Session fixation",
+        "Predictable session identifier",
+        "Session not invalidated on logout"
+      ],
+      "priority": "MEDIUM"
+    },
+    "logout": {
+      "hypotheses": [
+        "Session fixation",
+        "Predictable session identifier",
+        "Session not invalidated on logout"
+      ],
+      "priority": "MEDIUM"
+    },
+    "signout": {
+      "hypotheses": [
+        "Session fixation",
+        "Predictable session identifier",
+        "Session not invalidated on logout"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sign-out": {
+      "hypotheses": [
+        "Session fixation",
+        "Predictable session identifier",
+        "Session not invalidated on logout"
+      ],
+      "priority": "MEDIUM"
+    },
+    "remember": {
+      "hypotheses": [
+        "Session fixation",
+        "Predictable session identifier",
+        "Session not invalidated on logout"
+      ],
+      "priority": "MEDIUM"
+    },
+    "remember-me": {
+      "hypotheses": [
+        "Session fixation",
+        "Predictable session identifier",
+        "Session not invalidated on logout"
+      ],
+      "priority": "MEDIUM"
+    },
+    "register": {
+      "hypotheses": [
+        "Mass assignment (privilege escalation)",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "signup": {
+      "hypotheses": [
+        "Mass assignment (privilege escalation)",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sign-up": {
+      "hypotheses": [
+        "Mass assignment (privilege escalation)",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "registration": {
+      "hypotheses": [
+        "Mass assignment (privilege escalation)",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "join": {
+      "hypotheses": [
+        "Mass assignment (privilege escalation)",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "create-account": {
+      "hypotheses": [
+        "Mass assignment (privilege escalation)",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "createaccount": {
+      "hypotheses": [
+        "Mass assignment (privilege escalation)",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "new-user": {
+      "hypotheses": [
+        "Mass assignment (privilege escalation)",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "password": {
+      "hypotheses": [
+        "Password change CSRF / logic flaw",
+        "Credential disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "passwd": {
+      "hypotheses": [
+        "Password change CSRF / logic flaw",
+        "Credential disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "change-password": {
+      "hypotheses": [
+        "Password change CSRF / logic flaw",
+        "Credential disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "changepassword": {
+      "hypotheses": [
+        "Password change CSRF / logic flaw",
+        "Credential disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "credential": {
+      "hypotheses": [
+        "Password change CSRF / logic flaw",
+        "Credential disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "credentials": {
+      "hypotheses": [
+        "Password change CSRF / logic flaw",
+        "Credential disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "pwd": {
+      "hypotheses": [
+        "Password change CSRF / logic flaw",
+        "Credential disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "change-email": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "changeemail": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "update-email": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "email-change": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "new-email": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "change-phone": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "update-phone": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "change-username": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "unlink": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "delete-account": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "deactivate": {
+      "hypotheses": [
+        "Account takeover (email change to password reset)",
+        "Cross-site request forgery",
+        "Missing re-authentication on sensitive change"
+      ],
+      "priority": "HIGH"
+    },
+    "account": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "accounts": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "myaccount": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "my-account": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "user": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "users": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "userinfo": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "profile": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "profiles": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "member": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "members": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "membership": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "customer": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "customers": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "client": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "clients": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "people": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "person": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "contact-info": {
+      "hypotheses": [
+        "IDOR",
+        "Account takeover",
+        "Username enumeration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "settings": {
+      "hypotheses": [
+        "Cross-site request forgery",
+        "Mass assignment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "preferences": {
+      "hypotheses": [
+        "Cross-site request forgery",
+        "Mass assignment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "edit-profile": {
+      "hypotheses": [
+        "Cross-site request forgery",
+        "Mass assignment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "editprofile": {
+      "hypotheses": [
+        "Cross-site request forgery",
+        "Mass assignment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "config-account": {
+      "hypotheses": [
+        "Cross-site request forgery",
+        "Mass assignment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "personal": {
+      "hypotheses": [
+        "Cross-site request forgery",
+        "Mass assignment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "role": {
+      "hypotheses": [
+        "Privilege escalation (role manipulation)",
+        "Broken access control"
+      ],
+      "priority": "HIGH"
+    },
+    "roles": {
+      "hypotheses": [
+        "Privilege escalation (role manipulation)",
+        "Broken access control"
+      ],
+      "priority": "HIGH"
+    },
+    "permission": {
+      "hypotheses": [
+        "Privilege escalation (role manipulation)",
+        "Broken access control"
+      ],
+      "priority": "HIGH"
+    },
+    "permissions": {
+      "hypotheses": [
+        "Privilege escalation (role manipulation)",
+        "Broken access control"
+      ],
+      "priority": "HIGH"
+    },
+    "privilege": {
+      "hypotheses": [
+        "Privilege escalation (role manipulation)",
+        "Broken access control"
+      ],
+      "priority": "HIGH"
+    },
+    "privileges": {
+      "hypotheses": [
+        "Privilege escalation (role manipulation)",
+        "Broken access control"
+      ],
+      "priority": "HIGH"
+    },
+    "acl": {
+      "hypotheses": [
+        "Privilege escalation (role manipulation)",
+        "Broken access control"
+      ],
+      "priority": "HIGH"
+    },
+    "grant": {
+      "hypotheses": [
+        "Privilege escalation (role manipulation)",
+        "Broken access control"
+      ],
+      "priority": "HIGH"
+    },
+    "grants": {
+      "hypotheses": [
+        "Privilege escalation (role manipulation)",
+        "Broken access control"
+      ],
+      "priority": "HIGH"
+    },
+    "org": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "organization": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "organisation": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "tenant": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "tenants": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "team": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "teams": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "workspace": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "workspaces": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "group": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "groups": {
+      "hypotheses": [
+        "Cross-tenant IDOR",
+        "Broken access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "admin": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "administrator": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "administration": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "adminpanel": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "admin-panel": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "admincp": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "controlpanel": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "control-panel": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "manage": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "manager": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "management": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "backend": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "backoffice": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "back-office": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "panel": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "moderator": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "superadmin": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sysadmin": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "webadmin": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "siteadmin": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "administer": {
+      "hypotheses": [
+        "Default or weak credentials",
+        "Forced browsing / vertical access control"
+      ],
+      "priority": "MEDIUM"
+    },
+    "dashboard": {
+      "hypotheses": [
+        "Authenticated area (post-authentication target)",
+        "IDOR"
+      ],
+      "priority": "MEDIUM"
+    },
+    "dashboards": {
+      "hypotheses": [
+        "Authenticated area (post-authentication target)",
+        "IDOR"
+      ],
+      "priority": "MEDIUM"
+    },
+    "overview": {
+      "hypotheses": [
+        "Authenticated area (post-authentication target)",
+        "IDOR"
+      ],
+      "priority": "MEDIUM"
+    },
+    "home-admin": {
+      "hypotheses": [
+        "Authenticated area (post-authentication target)",
+        "IDOR"
+      ],
+      "priority": "MEDIUM"
+    },
+    "install": {
+      "hypotheses": [
+        "Exposed installer (reinstall / RCE)",
+        "Configuration disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "installer": {
+      "hypotheses": [
+        "Exposed installer (reinstall / RCE)",
+        "Configuration disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "installation": {
+      "hypotheses": [
+        "Exposed installer (reinstall / RCE)",
+        "Configuration disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "setup": {
+      "hypotheses": [
+        "Exposed installer (reinstall / RCE)",
+        "Configuration disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "wizard": {
+      "hypotheses": [
+        "Exposed installer (reinstall / RCE)",
+        "Configuration disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "config": {
+      "hypotheses": [
+        "Exposed installer (reinstall / RCE)",
+        "Configuration disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "configuration": {
+      "hypotheses": [
+        "Exposed installer (reinstall / RCE)",
+        "Configuration disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "configure": {
+      "hypotheses": [
+        "Exposed installer (reinstall / RCE)",
+        "Configuration disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "provision": {
+      "hypotheses": [
+        "Exposed installer (reinstall / RCE)",
+        "Configuration disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "maintenance": {
+      "hypotheses": [
+        "System information disclosure",
+        "Forced browsing"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sysinfo": {
+      "hypotheses": [
+        "System information disclosure",
+        "Forced browsing"
+      ],
+      "priority": "MEDIUM"
+    },
+    "serverinfo": {
+      "hypotheses": [
+        "System information disclosure",
+        "Forced browsing"
+      ],
+      "priority": "MEDIUM"
+    },
+    "diagnostics": {
+      "hypotheses": [
+        "System information disclosure",
+        "Forced browsing"
+      ],
+      "priority": "MEDIUM"
+    },
+    "api": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "apis": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "rest": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "restful": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "graphql": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "graphiql": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "gql": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "grpc": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "soap": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "wsdl": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "rpc": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "jsonrpc": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "json-rpc": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "odata": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "gateway": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "endpoint": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "endpoints": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "service": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "services": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "resource": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "resources": {
+      "hypotheses": [
+        "IDOR / broken object-level authorization",
+        "HTTP method tampering / parameter fuzzing",
+        "Injection",
+        "Broken function-level authorization"
+      ],
+      "priority": "MEDIUM"
+    },
+    "swagger": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "swagger-ui": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "swaggerui": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "openapi": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "open-api": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "redoc": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "apidocs": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "api-docs": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "api-doc": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "wadl": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "apispec": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "api-spec": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "explorer": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "api-explorer": {
+      "hypotheses": [
+        "Full API endpoint enumeration",
+        "Hidden or undocumented endpoints"
+      ],
+      "priority": "LOW"
+    },
+    "v1": {
+      "hypotheses": [
+        "Legacy API version (often unprotected)",
+        "IDOR",
+        "Deprecated vulnerable methods"
+      ],
+      "priority": "MEDIUM"
+    },
+    "v2": {
+      "hypotheses": [
+        "Legacy API version (often unprotected)",
+        "IDOR",
+        "Deprecated vulnerable methods"
+      ],
+      "priority": "MEDIUM"
+    },
+    "v3": {
+      "hypotheses": [
+        "Legacy API version (often unprotected)",
+        "IDOR",
+        "Deprecated vulnerable methods"
+      ],
+      "priority": "MEDIUM"
+    },
+    "v4": {
+      "hypotheses": [
+        "Legacy API version (often unprotected)",
+        "IDOR",
+        "Deprecated vulnerable methods"
+      ],
+      "priority": "MEDIUM"
+    },
+    "api/v1": {
+      "hypotheses": [
+        "Legacy API version (often unprotected)",
+        "IDOR",
+        "Deprecated vulnerable methods"
+      ],
+      "priority": "MEDIUM"
+    },
+    "api/v2": {
+      "hypotheses": [
+        "Legacy API version (often unprotected)",
+        "IDOR",
+        "Deprecated vulnerable methods"
+      ],
+      "priority": "MEDIUM"
+    },
+    "api/v3": {
+      "hypotheses": [
+        "Legacy API version (often unprotected)",
+        "IDOR",
+        "Deprecated vulnerable methods"
+      ],
+      "priority": "MEDIUM"
+    },
+    "apiv1": {
+      "hypotheses": [
+        "Legacy API version (often unprotected)",
+        "IDOR",
+        "Deprecated vulnerable methods"
+      ],
+      "priority": "MEDIUM"
+    },
+    "apiv2": {
+      "hypotheses": [
+        "Legacy API version (often unprotected)",
+        "IDOR",
+        "Deprecated vulnerable methods"
+      ],
+      "priority": "MEDIUM"
+    },
+    "webhook": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "webhooks": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "callback": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "callbacks": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "notify": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "notification-url": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "subscribe": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "pubsub": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "hook": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "hooks": {
+      "hypotheses": [
+        "SSRF",
+        "Payload injection",
+        "Missing source / signature validation"
+      ],
+      "priority": "MEDIUM"
+    },
+    "websocket": {
+      "hypotheses": [
+        "Missing authentication on socket",
+        "Message-based injection",
+        "Data leakage over stream"
+      ],
+      "priority": "MEDIUM"
+    },
+    "socketio": {
+      "hypotheses": [
+        "Missing authentication on socket",
+        "Message-based injection",
+        "Data leakage over stream"
+      ],
+      "priority": "MEDIUM"
+    },
+    "socket-io": {
+      "hypotheses": [
+        "Missing authentication on socket",
+        "Message-based injection",
+        "Data leakage over stream"
+      ],
+      "priority": "MEDIUM"
+    },
+    "streaming": {
+      "hypotheses": [
+        "Missing authentication on socket",
+        "Message-based injection",
+        "Data leakage over stream"
+      ],
+      "priority": "MEDIUM"
+    },
+    "eventsource": {
+      "hypotheses": [
+        "Missing authentication on socket",
+        "Message-based injection",
+        "Data leakage over stream"
+      ],
+      "priority": "MEDIUM"
+    },
+    "realtime": {
+      "hypotheses": [
+        "Missing authentication on socket",
+        "Message-based injection",
+        "Data leakage over stream"
+      ],
+      "priority": "MEDIUM"
+    },
+    "batch": {
+      "hypotheses": [
+        "Request batching (rate-limit bypass)",
+        "Bulk IDOR"
+      ],
+      "priority": "MEDIUM"
+    },
+    "bulk": {
+      "hypotheses": [
+        "Request batching (rate-limit bypass)",
+        "Bulk IDOR"
+      ],
+      "priority": "MEDIUM"
+    },
+    "graphql-batch": {
+      "hypotheses": [
+        "Request batching (rate-limit bypass)",
+        "Bulk IDOR"
+      ],
+      "priority": "MEDIUM"
+    },
+    "multi": {
+      "hypotheses": [
+        "Request batching (rate-limit bypass)",
+        "Bulk IDOR"
+      ],
+      "priority": "MEDIUM"
+    },
+    "aggregate": {
+      "hypotheses": [
+        "Request batching (rate-limit bypass)",
+        "Bulk IDOR"
+      ],
+      "priority": "MEDIUM"
+    },
+    "upload": {
+      "hypotheses": [
+        "Unrestricted file upload (webshell)",
+        "Extension / content-type filter bypass",
+        "SSRF / XXE via remote import"
+      ],
+      "priority": "HIGH"
+    },
+    "uploads": {
+      "hypotheses": [
+        "Unrestricted file upload (webshell)",
+        "Extension / content-type filter bypass",
+        "SSRF / XXE via remote import"
+      ],
+      "priority": "HIGH"
+    },
+    "uploader": {
+      "hypotheses": [
+        "Unrestricted file upload (webshell)",
+        "Extension / content-type filter bypass",
+        "SSRF / XXE via remote import"
+      ],
+      "priority": "HIGH"
+    },
+    "fileupload": {
+      "hypotheses": [
+        "Unrestricted file upload (webshell)",
+        "Extension / content-type filter bypass",
+        "SSRF / XXE via remote import"
+      ],
+      "priority": "HIGH"
+    },
+    "file-upload": {
+      "hypotheses": [
+        "Unrestricted file upload (webshell)",
+        "Extension / content-type filter bypass",
+        "SSRF / XXE via remote import"
+      ],
+      "priority": "HIGH"
+    },
+    "import": {
+      "hypotheses": [
+        "Unrestricted file upload (webshell)",
+        "Extension / content-type filter bypass",
+        "SSRF / XXE via remote import"
+      ],
+      "priority": "HIGH"
+    },
+    "importer": {
+      "hypotheses": [
+        "Unrestricted file upload (webshell)",
+        "Extension / content-type filter bypass",
+        "SSRF / XXE via remote import"
+      ],
+      "priority": "HIGH"
+    },
+    "ingest": {
+      "hypotheses": [
+        "Unrestricted file upload (webshell)",
+        "Extension / content-type filter bypass",
+        "SSRF / XXE via remote import"
+      ],
+      "priority": "HIGH"
+    },
+    "download": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "downloads": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "export": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "exporter": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "getfile": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "get-file": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "readfile": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "attachment": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "attachments": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "attach": {
+      "hypotheses": [
+        "Path traversal / local file inclusion",
+        "CSV formula injection"
+      ],
+      "priority": "HIGH"
+    },
+    "filemanager": {
+      "hypotheses": [
+        "Path traversal",
+        "Unrestricted file upload (webshell)",
+        "Directory listing"
+      ],
+      "priority": "HIGH"
+    },
+    "file-manager": {
+      "hypotheses": [
+        "Path traversal",
+        "Unrestricted file upload (webshell)",
+        "Directory listing"
+      ],
+      "priority": "HIGH"
+    },
+    "files": {
+      "hypotheses": [
+        "Path traversal",
+        "Unrestricted file upload (webshell)",
+        "Directory listing"
+      ],
+      "priority": "HIGH"
+    },
+    "filebrowser": {
+      "hypotheses": [
+        "Path traversal",
+        "Unrestricted file upload (webshell)",
+        "Directory listing"
+      ],
+      "priority": "HIGH"
+    },
+    "file-browser": {
+      "hypotheses": [
+        "Path traversal",
+        "Unrestricted file upload (webshell)",
+        "Directory listing"
+      ],
+      "priority": "HIGH"
+    },
+    "explorer-file": {
+      "hypotheses": [
+        "Path traversal",
+        "Unrestricted file upload (webshell)",
+        "Directory listing"
+      ],
+      "priority": "HIGH"
+    },
+    "media": {
+      "hypotheses": [
+        "SSRF via URL fetch",
+        "Path traversal",
+        "Unrestricted file upload (webshell)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "avatar": {
+      "hypotheses": [
+        "SSRF via URL fetch",
+        "Path traversal",
+        "Unrestricted file upload (webshell)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "avatars": {
+      "hypotheses": [
+        "SSRF via URL fetch",
+        "Path traversal",
+        "Unrestricted file upload (webshell)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "thumbnail": {
+      "hypotheses": [
+        "SSRF via URL fetch",
+        "Path traversal",
+        "Unrestricted file upload (webshell)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "thumb": {
+      "hypotheses": [
+        "SSRF via URL fetch",
+        "Path traversal",
+        "Unrestricted file upload (webshell)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "gallery": {
+      "hypotheses": [
+        "SSRF via URL fetch",
+        "Path traversal",
+        "Unrestricted file upload (webshell)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "banner": {
+      "hypotheses": [
+        "SSRF via URL fetch",
+        "Path traversal",
+        "Unrestricted file upload (webshell)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "imagefetch": {
+      "hypotheses": [
+        "SSRF via URL fetch",
+        "Path traversal",
+        "Unrestricted file upload (webshell)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "document": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "documents": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "docx": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "pdf": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "invoice": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "invoices": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "receipt": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "report": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "reports": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "generate": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "generator": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "printpdf": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "print-pdf": {
+      "hypotheses": [
+        "Server-side template injection (SSTI)",
+        "Path traversal",
+        "SSRF via HTML-to-PDF renderer"
+      ],
+      "priority": "MEDIUM"
+    },
+    "backup": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "backups": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "archive": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "archives": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "dump": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "dumps": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "storage": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "shared": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "snapshot": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sql-dump": {
+      "hypotheses": [
+        "Source code / data disclosure",
+        "Sensitive archive exposure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "search": {
+      "hypotheses": [
+        "SQL / NoSQL injection",
+        "Reflected XSS",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "query": {
+      "hypotheses": [
+        "SQL / NoSQL injection",
+        "Reflected XSS",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "find": {
+      "hypotheses": [
+        "SQL / NoSQL injection",
+        "Reflected XSS",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "finder": {
+      "hypotheses": [
+        "SQL / NoSQL injection",
+        "Reflected XSS",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "filter": {
+      "hypotheses": [
+        "SQL / NoSQL injection",
+        "Reflected XSS",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sort": {
+      "hypotheses": [
+        "SQL / NoSQL injection",
+        "Reflected XSS",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "lookup": {
+      "hypotheses": [
+        "SQL / NoSQL injection",
+        "Reflected XSS",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "autocomplete": {
+      "hypotheses": [
+        "SQL / NoSQL injection",
+        "Reflected XSS",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "suggest": {
+      "hypotheses": [
+        "SQL / NoSQL injection",
+        "Reflected XSS",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "ping": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "nslookup": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "traceroute": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "exec": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "execute": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "cmd": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "command": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "shell": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "eval": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "system-cmd": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "runcmd": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "run-command": {
+      "hypotheses": [
+        "OS command injection",
+        "SSTI / eval-based RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "render": {
+      "hypotheses": [
+        "Server-side template injection (RCE)",
+        "Stored XSS"
+      ],
+      "priority": "HIGH"
+    },
+    "template": {
+      "hypotheses": [
+        "Server-side template injection (RCE)",
+        "Stored XSS"
+      ],
+      "priority": "HIGH"
+    },
+    "preview": {
+      "hypotheses": [
+        "Server-side template injection (RCE)",
+        "Stored XSS"
+      ],
+      "priority": "HIGH"
+    },
+    "compose": {
+      "hypotheses": [
+        "Server-side template injection (RCE)",
+        "Stored XSS"
+      ],
+      "priority": "HIGH"
+    },
+    "compile": {
+      "hypotheses": [
+        "Server-side template injection (RCE)",
+        "Stored XSS"
+      ],
+      "priority": "HIGH"
+    },
+    "twig": {
+      "hypotheses": [
+        "Server-side template injection (RCE)",
+        "Stored XSS"
+      ],
+      "priority": "HIGH"
+    },
+    "jinja": {
+      "hypotheses": [
+        "Server-side template injection (RCE)",
+        "Stored XSS"
+      ],
+      "priority": "HIGH"
+    },
+    "handlebars": {
+      "hypotheses": [
+        "Server-side template injection (RCE)",
+        "Stored XSS"
+      ],
+      "priority": "HIGH"
+    },
+    "mail": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "email": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sendmail": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "smtp": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "contact": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "feedback": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "newsletter": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "subscribe-email": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "invite": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sendmessage": {
+      "hypotheses": [
+        "SSTI via email template",
+        "SMTP header injection",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "message": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "messages": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "comment": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "comments": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "post": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "posts": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "review": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "reviews": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "note": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "notes": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "article": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "articles": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "blog": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "page": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "pages": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "forum": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "thread": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "topic": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "chat": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "wall": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "feed": {
+      "hypotheses": [
+        "Stored XSS",
+        "IDOR",
+        "Server-side template injection (SSTI)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "order": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "orders": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "cart": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "basket": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "checkout": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "payment": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "payments": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "billing": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "invoice-pay": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "transaction": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "transactions": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "refund": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "coupon": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "promo": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "discount": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "voucher": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "wallet": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "balance": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "credit": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "subscription": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "subscriptions": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "purchase": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "buy": {
+      "hypotheses": [
+        "IDOR (other users' orders/payments)",
+        "Price / quantity tampering",
+        "Race condition (checkout)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "proxy": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "fetch": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "curl": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "request-url": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "remote": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "loadurl": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "load-url": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "fetchurl": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "imageproxy": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "image-proxy": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "screenshot": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "thumbnailer": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "url-preview": {
+      "hypotheses": [
+        "SSRF (internal services, cloud metadata)",
+        "Open redirect"
+      ],
+      "priority": "HIGH"
+    },
+    "redirect": {
+      "hypotheses": [
+        "Open redirect",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "redir": {
+      "hypotheses": [
+        "Open redirect",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "goto": {
+      "hypotheses": [
+        "Open redirect",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "return-url": {
+      "hypotheses": [
+        "Open redirect",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "returnurl": {
+      "hypotheses": [
+        "Open redirect",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "next-url": {
+      "hypotheses": [
+        "Open redirect",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "redirect-uri": {
+      "hypotheses": [
+        "Open redirect",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "redirect_uri": {
+      "hypotheses": [
+        "Open redirect",
+        "SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "debug": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "console": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "trace": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "phpinfo": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "whoops": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "debugbar": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "_debug": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "__debug__": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "xdebug": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "profiler": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "_profiler": {
+      "hypotheses": [
+        "Stack trace / configuration disclosure",
+        "Debug console RCE"
+      ],
+      "priority": "HIGH"
+    },
+    "dev": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "develop": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "development": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "staging": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "stage": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sandbox": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "demo": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "beta": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "preview-env": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "qa": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "uat": {
+      "hypotheses": [
+        "Relaxed security controls",
+        "Data exposure in pre-production environment"
+      ],
+      "priority": "MEDIUM"
+    },
+    "internal": {
+      "hypotheses": [
+        "Internal API (often unauthenticated)",
+        "SSRF target",
+        "Forced browsing"
+      ],
+      "priority": "HIGH"
+    },
+    "intranet": {
+      "hypotheses": [
+        "Internal API (often unauthenticated)",
+        "SSRF target",
+        "Forced browsing"
+      ],
+      "priority": "HIGH"
+    },
+    "restricted": {
+      "hypotheses": [
+        "Internal API (often unauthenticated)",
+        "SSRF target",
+        "Forced browsing"
+      ],
+      "priority": "HIGH"
+    },
+    "secret-area": {
+      "hypotheses": [
+        "Internal API (often unauthenticated)",
+        "SSRF target",
+        "Forced browsing"
+      ],
+      "priority": "HIGH"
+    },
+    "confidential": {
+      "hypotheses": [
+        "Internal API (often unauthenticated)",
+        "SSRF target",
+        "Forced browsing"
+      ],
+      "priority": "HIGH"
+    },
+    "internal-api": {
+      "hypotheses": [
+        "Internal API (often unauthenticated)",
+        "SSRF target",
+        "Forced browsing"
+      ],
+      "priority": "HIGH"
+    },
+    "phpmyadmin": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "adminer": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "phppgadmin": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "dbadmin": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "myadmin": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "sqladmin": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "pgadmin": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "mongo-express": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "mongoexpress": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "redis-commander": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "rediscommander": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "database-admin": {
+      "hypotheses": [
+        "Default credentials",
+        "Direct database access"
+      ],
+      "priority": "MEDIUM"
+    },
+    "actuator": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "metrics": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "health": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "healthz": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "healthcheck": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "readiness": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "liveness": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "status-page": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "monitor": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "monitoring": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "prometheus": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "grafana": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "kibana": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "heapdump": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "threaddump": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "jolokia": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "loggers": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "mappings": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "configprops": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "env-actuator": {
+      "hypotheses": [
+        "Secret / environment / metrics disclosure",
+        "Heap dump containing credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "wp-admin": {
+      "hypotheses": [
+        "WordPress (WPScan, vulnerable plugins, XML-RPC)",
+        "wp-config disclosure (database credentials)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "wp-login": {
+      "hypotheses": [
+        "WordPress (WPScan, vulnerable plugins, XML-RPC)",
+        "wp-config disclosure (database credentials)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "wp-content": {
+      "hypotheses": [
+        "WordPress (WPScan, vulnerable plugins, XML-RPC)",
+        "wp-config disclosure (database credentials)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "wp-includes": {
+      "hypotheses": [
+        "WordPress (WPScan, vulnerable plugins, XML-RPC)",
+        "wp-config disclosure (database credentials)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "wp-json": {
+      "hypotheses": [
+        "WordPress (WPScan, vulnerable plugins, XML-RPC)",
+        "wp-config disclosure (database credentials)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "wp-config": {
+      "hypotheses": [
+        "WordPress (WPScan, vulnerable plugins, XML-RPC)",
+        "wp-config disclosure (database credentials)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "xmlrpc": {
+      "hypotheses": [
+        "WordPress (WPScan, vulnerable plugins, XML-RPC)",
+        "wp-config disclosure (database credentials)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "wp-cron": {
+      "hypotheses": [
+        "WordPress (WPScan, vulnerable plugins, XML-RPC)",
+        "wp-config disclosure (database credentials)"
+      ],
+      "priority": "MEDIUM"
+    },
+    "joomla": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "com_": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "drupal": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "typo3": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "umbraco": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "magento": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "prestashop": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "opencart": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "ghost": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "strapi": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "django-admin": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "telescope": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "horizon": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "artisan": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "symfony": {
+      "hypotheses": [
+        "Known CMS version CVEs",
+        "Default administrative paths"
+      ],
+      "priority": "MEDIUM"
+    },
+    "metadata": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "meta-data": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "cloud-init": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "cloudinit": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "terraform": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "vault": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "consul": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "etcd": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "kubeconfig": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "portainer": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "rancher": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "jenkins": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "gitlab": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "sonarqube": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "nexus": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "artifactory": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "registry": {
+      "hypotheses": [
+        "Cloud metadata service (IAM credentials)",
+        "Infrastructure secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "robots": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "sitemap": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "humans": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "changelog": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "readme": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "license": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "version": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "crossdomain": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "clientaccesspolicy": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "ads.txt": {
+      "hypotheses": [
+        "Hidden paths / version disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "flag": {
+      "hypotheses": [
+        "CTF flag / sensitive data"
+      ],
+      "priority": "HIGH"
+    },
+    "user.txt": {
+      "hypotheses": [
+        "CTF flag / sensitive data"
+      ],
+      "priority": "HIGH"
+    },
+    "root.txt": {
+      "hypotheses": [
+        "CTF flag / sensitive data"
+      ],
+      "priority": "HIGH"
+    },
+    "proof.txt": {
+      "hypotheses": [
+        "CTF flag / sensitive data"
+      ],
+      "priority": "HIGH"
+    },
+    "secret.txt": {
+      "hypotheses": [
+        "CTF flag / sensitive data"
+      ],
+      "priority": "HIGH"
+    },
+    ".git": {
+      "hypotheses": [
+        "Git repository disclosure (git-dumper: source + credentials in history)"
+      ],
+      "priority": "CRITICAL"
+    },
+    ".svn": {
+      "hypotheses": [
+        "SVN source code disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    ".hg": {
+      "hypotheses": [
+        "Mercurial source code disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    ".bzr": {
+      "hypotheses": [
+        "Bazaar source code disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    ".env": {
+      "hypotheses": [
+        "Credentials, SECRET_KEY, API keys"
+      ],
+      "priority": "CRITICAL"
+    },
+    ".aws": {
+      "hypotheses": [
+        "AWS credentials"
+      ],
+      "priority": "CRITICAL"
+    },
+    ".azure": {
+      "hypotheses": [
+        "Azure credentials"
+      ],
+      "priority": "CRITICAL"
+    },
+    ".gcloud": {
+      "hypotheses": [
+        "GCP credentials"
+      ],
+      "priority": "CRITICAL"
+    },
+    ".ssh": {
+      "hypotheses": [
+        "SSH private keys (id_rsa)"
+      ],
+      "priority": "CRITICAL"
+    },
+    "id_rsa": {
+      "hypotheses": [
+        "SSH private key (host access)"
+      ],
+      "priority": "CRITICAL"
+    },
+    "id_dsa": {
+      "hypotheses": [
+        "SSH private key"
+      ],
+      "priority": "CRITICAL"
+    },
+    "authorized_keys": {
+      "hypotheses": [
+        "SSH authorized_keys"
+      ],
+      "priority": "HIGH"
+    },
+    "known_hosts": {
+      "hypotheses": [
+        "SSH known_hosts (host reconnaissance)"
+      ],
+      "priority": "MEDIUM"
+    },
+    ".htpasswd": {
+      "hypotheses": [
+        "Basic-auth credentials (hashes)"
+      ],
+      "priority": "HIGH"
+    },
+    ".htaccess": {
+      "hypotheses": [
+        "Configuration override",
+        "Rewrite rule disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    ".netrc": {
+      "hypotheses": [
+        "Cleartext credentials"
+      ],
+      "priority": "HIGH"
+    },
+    ".git-credentials": {
+      "hypotheses": [
+        "Cleartext git credentials"
+      ],
+      "priority": "CRITICAL"
+    },
+    ".bash_history": {
+      "hypotheses": [
+        "Command history (credentials/paths)"
+      ],
+      "priority": "MEDIUM"
+    },
+    ".npmrc": {
+      "hypotheses": [
+        "npm authentication tokens"
+      ],
+      "priority": "MEDIUM"
+    },
+    ".pypirc": {
+      "hypotheses": [
+        "PyPI authentication tokens"
+      ],
+      "priority": "MEDIUM"
+    },
+    ".dockercfg": {
+      "hypotheses": [
+        "Docker registry credentials"
+      ],
+      "priority": "HIGH"
+    },
+    ".dockerenv": {
+      "hypotheses": [
+        "Docker container indicator"
+      ],
+      "priority": "LOW"
+    },
+    ".kube": {
+      "hypotheses": [
+        "kubeconfig (cluster access)"
+      ],
+      "priority": "CRITICAL"
+    },
+    ".ds_store": {
+      "hypotheses": [
+        "Directory listing (macOS)"
+      ],
+      "priority": "LOW"
+    },
+    ".well-known": {
+      "hypotheses": [
+        "Information disclosure (security.txt, etc.)"
+      ],
+      "priority": "LOW"
+    },
+    ".bak": {
+      "hypotheses": [
+        "Source / configuration backup"
+      ],
+      "priority": "HIGH"
+    },
+    ".old": {
+      "hypotheses": [
+        "Source code backup"
+      ],
+      "priority": "HIGH"
+    },
+    ".orig": {
+      "hypotheses": [
+        "Source backup (merge artifact)"
+      ],
+      "priority": "HIGH"
+    },
+    ".save": {
+      "hypotheses": [
+        "Source code backup"
+      ],
+      "priority": "HIGH"
+    },
+    ".swp": {
+      "hypotheses": [
+        "Vim swap file (source disclosure)"
+      ],
+      "priority": "MEDIUM"
+    },
+    ".swo": {
+      "hypotheses": [
+        "Vim swap file (source disclosure)"
+      ],
+      "priority": "MEDIUM"
+    },
+    ".sql": {
+      "hypotheses": [
+        "Database dump"
+      ],
+      "priority": "HIGH"
+    },
+    ".sqlite": {
+      "hypotheses": [
+        "SQLite database file"
+      ],
+      "priority": "HIGH"
+    },
+    ".db": {
+      "hypotheses": [
+        "Database file"
+      ],
+      "priority": "HIGH"
+    },
+    ".pem": {
+      "hypotheses": [
+        "Private key / certificate"
+      ],
+      "priority": "HIGH"
+    },
+    ".key": {
+      "hypotheses": [
+        "Private key"
+      ],
+      "priority": "HIGH"
+    },
+    ".crt": {
+      "hypotheses": [
+        "Certificate (reconnaissance)"
+      ],
+      "priority": "LOW"
+    },
+    ".p12": {
+      "hypotheses": [
+        "Key / certificate store"
+      ],
+      "priority": "HIGH"
+    },
+    ".pfx": {
+      "hypotheses": [
+        "Key / certificate store"
+      ],
+      "priority": "HIGH"
+    },
+    "web.config": {
+      "hypotheses": [
+        "ASP.NET configuration disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "config.php": {
+      "hypotheses": [
+        "Database credential / secret disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "configuration.php": {
+      "hypotheses": [
+        "Joomla credential disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "settings.py": {
+      "hypotheses": [
+        "Django SECRET_KEY / credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "database.yml": {
+      "hypotheses": [
+        "Rails database credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "application.properties": {
+      "hypotheses": [
+        "Spring secrets / credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "application.yml": {
+      "hypotheses": [
+        "Spring secrets / credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "appsettings.json": {
+      "hypotheses": [
+        "ASP.NET secrets / credentials"
+      ],
+      "priority": "HIGH"
+    },
+    "docker-compose": {
+      "hypotheses": [
+        "Service environment / secret disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "dockerfile": {
+      "hypotheses": [
+        "Build process / secret disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "composer.json": {
+      "hypotheses": [
+        "PHP dependency disclosure (version recon)"
+      ],
+      "priority": "LOW"
+    },
+    "package.json": {
+      "hypotheses": [
+        "Node dependency disclosure (version recon)"
+      ],
+      "priority": "LOW"
+    },
+    "gemfile": {
+      "hypotheses": [
+        "Ruby dependency disclosure (version recon)"
+      ],
+      "priority": "LOW"
+    },
+    "requirements.txt": {
+      "hypotheses": [
+        "Python dependency disclosure (version recon)"
+      ],
+      "priority": "LOW"
+    },
+    ".gitlab-ci": {
+      "hypotheses": [
+        "CI configuration — pipeline secrets"
+      ],
+      "priority": "MEDIUM"
+    },
+    "jenkinsfile": {
+      "hypotheses": [
+        "CI configuration — pipeline secrets"
+      ],
+      "priority": "MEDIUM"
+    },
+    ".travis": {
+      "hypotheses": [
+        "CI configuration — secrets"
+      ],
+      "priority": "MEDIUM"
+    },
+    "secret": {
+      "hypotheses": [
+        "Secret / key disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "secrets": {
+      "hypotheses": [
+        "Secret / key disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    ".tfstate": {
+      "hypotheses": [
+        "Terraform state — infrastructure secrets"
+      ],
+      "priority": "CRITICAL"
+    },
+    "server-status": {
+      "hypotheses": [
+        "Apache mod_status information disclosure"
+      ],
+      "priority": "LOW"
+    },
+    "server-info": {
+      "hypotheses": [
+        "Apache mod_info configuration disclosure"
+      ],
+      "priority": "MEDIUM"
+    },
+    "__pycache__": {
+      "hypotheses": [
+        "Compiled Python bytecode disclosure"
+      ],
+      "priority": "MEDIUM"
+    }
+  }
+}

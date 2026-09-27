@@ -1,0 +1,42 @@
+{
+  "27017": {
+    "service": "MongoDB",
+    "vulns": ["Unauthenticated anonymous access", "NoSQL injection", "Database enumeration via mongo shell"]
+  },
+  "3306": {
+    "service": "MySQL",
+    "vulns": ["Unauthenticated anonymous access (mysql -h target -u root)", "SQL injection", "Default credentials"]
+  },
+  "5432": {
+    "service": "PostgreSQL",
+    "vulns": ["Unauthenticated anonymous access", "SQL injection", "Default credentials"]
+  },
+  "6379": {
+    "service": "Redis",
+    "vulns": ["Unauthenticated access", "Redis RCE via CONFIG SET", "SSRF-to-Redis"]
+  },
+  "9200": {
+    "service": "Elasticsearch",
+    "vulns": ["Unauthenticated open index", "Data disclosure"]
+  },
+  "8500": {
+    "service": "Consul",
+    "vulns": ["Unauthenticated API access", "RCE via health check"]
+  },
+  "4848": {
+    "service": "GlassFish Admin",
+    "vulns": ["Default credentials (admin:admin)", "Java deserialization"]
+  },
+  "8080": {
+    "service": "HTTP (Tomcat/Jenkins/etc)",
+    "vulns": ["Tomcat Manager default credentials (/manager/html)", "Jenkins Script Console RCE"]
+  },
+  "2375": {
+    "service": "Docker API",
+    "vulns": ["Unauthenticated Docker daemon (host filesystem mount -> host root)"]
+  },
+  "5000": {
+    "service": "HTTP (Flask/Werkzeug)",
+    "vulns": ["Werkzeug debug console RCE (/console)", "Flask SSTI (Jinja2)", "Local file inclusion via parameters"]
+  }
+}

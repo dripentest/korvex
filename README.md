@@ -1,0 +1,224 @@
+# Stack Fingerprinter
+
+A modular web reconnaissance toolkit that fingerprints a target's technology stack,
+brute-forces and discovers content, correlates every finding into prioritized
+attack hypotheses, and renders the whole picture as an interactive attack graph.
+
+It wraps the standard recon tools (`nmap`, `feroxbuster`, `subfinder`, `ffuf`) behind
+one consistent CLI, and adds a correlation engine of **570+ signatures** that turns raw
+scan output ("here is a path, here is a header") into actionable, stack-aware leads
+("`/compose` on a Flask app → server-side template injection via Jinja2").
+
+Everything is pure Python (one dependency: `requests`) plus optional external binaries,
+and every subcommand writes JSON so stages compose freely.
+
+---
+
+## Highlights
+
+- **Stack fingerprinting** from HTTP headers, cookies and open ports, with a confidence
+  score derived from the number of independent signals.
+- **Correlation engine** — 573 path signatures + cookie/header/port databases map findings
+  to prioritized vulnerability hypotheses (CRITICAL → LOW).
+- **Stack-aware hypotheses** — the same path is refined by the detected stack: SSTI becomes
+  *Jinja2* on Python, *Twig* on PHP, *Freemarker* on Java; file upload becomes *.php/.phtml*
+  on PHP, *.jsp* on Java.
+- **Evidence-gating** — a path-specific finding (e.g. Werkzeug `/console` RCE) is suppressed
+  when the tool actually checked that path and it returned 404, instead of crying wolf.
+- **Auth-gated detection** — `301/302 → login`, `401`, `403` routes are surfaced as
+  post-authentication targets, not dumped into noise.
+- **Interactive attack graph** — a dependency-free single-file HTML: pan/zoom, drag,
+  per-node status (testing / exploited / failed), search, priority/status filters, notes,
+  and PNG export. State persists in `localStorage`.
+- **Adaptive** — the graph only contains nodes for what was actually found; noise collapses
+  into a single hub node so 50 discovered directories never turn it into a mess.
+
+---
+
+## Recon pipeline
+
+```
+subs / vhost        →  discover hosts (broad targets / lab boxes)
+nmap                →  open ports, services, versions
+fingerprint / scan  →  stack, database, WAF, vulnerabilities
+dirs                →  content brute-force + per-path hypotheses
+passive             →  robots / sitemap / JS endpoints & secrets (no brute)
+graph               →  merge everything into an interactive attack graph
+```
+
+Subcommands are independent: fuzzing more directories never re-runs `nmap`, and every
+stage saves JSON that later stages read.
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/dripentest/fingerprint
+cd fingerprint
+pip install -r requirements.txt        # only: requests
+```
+
+**Requirements**
+
+- Python 3.10+
+- `requests` (Python)
+- External binaries, each needed only by the matching command:
+  [`nmap`](https://nmap.org), [`feroxbuster`](https://github.com/epi052/feroxbuster),
+  [`subfinder`](https://github.com/projectdiscovery/subfinder),
+  [`ffuf`](https://github.com/ffuf/ffuf)
+
+**Optional — a short alias** so it runs from anywhere:
+
+```bash
+alias fp='python3 /path/to/fingerprint/main.py'
+```
+
+---
+
+## Usage
+
+Run `fp` (or `python3 main.py`) with no arguments for the full help. Every command
+writes its result to the current directory as JSON.
+
+### `scan` — stack + fingerprint in one run
+
+```bash
+fp scan --target target.thm
+fp scan --target target.thm --port 5000 --no-nmap   # skip nmap, port known
+```
+
+### `nmap` — ports only
+
+```bash
+fp nmap --target target.thm                 # -> target.thm.nmap.json
+fp nmap --from-xml existing-scan.xml         # parse an existing nmap -oX file
+```
+
+### `fingerprint` — HTTP stack detection + report
+
+```bash
+fp fingerprint --target target.thm --port 5000
+```
+
+```
+target.thm:5000
+──────────────
+  stack      Python / Flask (Werkzeug)   medium
+  database   SQLite, PostgreSQL, MySQL
+  server     Werkzeug/2.0.2 Python/3.10.12
+
+paths
+  /debug → 200
+
+vulns
+  HIGH    Flask SSTI (Jinja2)
+  HIGH    Local file inclusion via parameters
+
+  missing    HSTS · CSP
+  absent     /console        # checked and not present — not reported as a finding
+```
+
+### `dirs` — content brute-force with per-path hypotheses
+
+```bash
+fp dirs --target target.thm --port 5000 -w wordlist.txt --graph
+fp dirs --target target.thm --port 5000 -w big.txt -t 40 -d 1   # 40 threads, shallow recursion
+```
+
+`Ctrl+C` stops the scan and keeps what was found. Each discovered path is correlated to
+hypotheses and grouped by severity; auth-gated routes and unsignatured noise are separated.
+
+### `subs` — subdomain enumeration (broad targets)
+
+```bash
+fp subs --target example.com
+```
+
+Runs `subfinder` (passive) then resolves and HTTP-probes every name, splitting results into
+**live web hosts**, **resolve-but-no-web**, and **dead** — the `subfinder | httpx` pattern in
+one command (subfinder alone does not verify liveness).
+
+### `vhost` — virtual-host brute-force (lab boxes)
+
+```bash
+fp vhost --target target.thm --port 80 -w subdomains.txt --ip 10.10.1.5
+```
+
+Fuzzes the `Host` header (`Host: FUZZ.target.thm`) with `ffuf` against the box, using
+auto-calibration to filter the default vhost's baseline. For targets that are not in public
+DNS or passive sources.
+
+### `passive` — passive recon (no brute-force)
+
+```bash
+fp passive --target target.thm --port 5000 --graph
+```
+
+Pulls paths from `robots.txt` / `sitemap.xml` and greps same-host JavaScript for endpoints
+and leaked secrets (AWS/GCP/Slack/Stripe/GitHub keys, private keys, JWTs). JS is
+pattern-matched, never executed.
+
+### `graph` — interactive attack graph
+
+```bash
+fp graph --target target.thm \
+  --nmap-json target.thm.nmap.json \
+  --dirs-json target.thm-5000.dirs.json
+```
+
+Merges saved results (and an optional live fingerprint) into a single self-contained HTML
+file. Open it in any browser — no server required.
+
+**Graph controls:** drag background to pan, wheel to zoom, drag nodes to arrange,
+double-click for details, right-click a node to set status or the background to add a note.
+Search and the priority/status filters dim everything else; **PNG** exports a report-ready
+image. Layout, statuses and notes are saved per target in `localStorage`.
+
+---
+
+## How it works
+
+**Signature databases** (`data/*.json`) map observations to stack, database and
+vulnerability candidates:
+
+- `path_signatures.json` — 573 keyword signatures (substring-matched, so `/api/internal/users`
+  matches too) covering authentication, account/access-control, admin, APIs, file operations,
+  injection surfaces, SSRF, debug/dev/internal, monitoring, CMS, cloud, sensitive files and more.
+- `cookie_signatures.json` / `header_signatures.json` — framework detection (PHPSESSID → PHP,
+  `connect.sid` → Node/Express, `Server: Werkzeug` → Flask, …).
+- `port_signatures.json`, `priority.json`, `waf_signatures.json`, `interesting_paths.json`.
+
+**The correlation engine** (`analyzer.py`, `graph_builder.py`) combines these: it scores stack
+confidence, gathers database candidates, ranks vulnerabilities by severity, gates path-specific
+findings on actual path presence, and refines generic hypotheses with the detected stack. The
+result is a node/edge graph rendered by a dependency-free SVG engine (`renderer.py`).
+
+---
+
+## Project layout
+
+```
+main.py            CLI entry point (subcommands)
+nmap_parser.py     parse nmap -oX into ports/services/OS
+fingerprinter.py   HTTP fingerprint: headers, cookies, paths, WAF
+signatures.py      load signature DBs, path/WAF matching
+analyzer.py        correlate signals -> stack/db/prioritized vulns
+confidence.py      stack-confidence scoring
+dir_bruteforce.py  feroxbuster wrapper (content brute-force)
+subs.py            subfinder wrapper + liveness check
+vhost.py           ffuf Host-header vhost brute-force
+passive.py         robots/sitemap/JS passive recon
+graph_builder.py   build the adaptive attack graph (nodes/edges)
+renderer.py        standalone interactive HTML graph engine
+reporter.py        minimalist console report
+data/*.json        signature databases
+```
+
+---
+
+## Disclaimer
+
+For use only against systems you are explicitly authorized to test — CTF/lab boxes,
+your own infrastructure, or engagements with written permission. You are responsible for
+how you use it.

@@ -1,0 +1,172 @@
+{
+  "PHPSESSID": {
+    "stack": "PHP",
+    "db": ["MySQL", "MariaDB", "PostgreSQL"],
+    "vulns": ["SQLi", "LFI/RFI", "unserialize (PHPGGC)", "file_upload → webshell", "type juggling"]
+  },
+  "JSESSIONID": {
+    "stack": "Java (Servlet/JSP/Spring)",
+    "db": ["Oracle", "MySQL", "PostgreSQL"],
+    "vulns": ["Java deserialization (ysoserial)", "XXE", "Log4Shell", "Spring4Shell", "Struts CVE"]
+  },
+  "ASP.NET_SessionId": {
+    "stack": "ASP.NET",
+    "db": ["MSSQL"],
+    "vulns": ["ViewState deserialization", "padding oracle (MS10-070)", "SQLi → MSSQL"]
+  },
+  ".ASPXAUTH": {
+    "stack": "ASP.NET (Forms auth)",
+    "db": ["MSSQL"],
+    "vulns": ["ViewState deserialization", "padding oracle (MS10-070)"]
+  },
+  ".AspNetCore.Identity.Application": {
+    "stack": "ASP.NET Core (Identity)",
+    "db": ["MSSQL", "PostgreSQL"],
+    "vulns": ["Mass assignment (overposting)", "JWT weaknesses", "Broken access control", "SSRF"]
+  },
+  ".AspNetCore.Session": {
+    "stack": "ASP.NET Core",
+    "db": ["MSSQL", "PostgreSQL"],
+    "vulns": ["Mass assignment (overposting)", "Configuration / secret disclosure", "SSRF"]
+  },
+  ".AspNetCore.Antiforgery.*": {
+    "stack": "ASP.NET Core",
+    "db": ["MSSQL", "PostgreSQL"],
+    "vulns": ["Mass assignment (overposting)", "Broken access control"]
+  },
+  "connect.sid": {
+    "stack": "Node.js / Express",
+    "db": ["MongoDB", "PostgreSQL", "MySQL"],
+    "vulns": ["NoSQLi ($ne/$gt/$regex/$where)", "Prototype Pollution", "SSTI (EJS/Pug/Handlebars)", "JWT (alg:none)", "SSRF"]
+  },
+  "koa.sess": {
+    "stack": "Node.js / Koa",
+    "db": ["MongoDB", "PostgreSQL"],
+    "vulns": ["NoSQL injection", "Prototype pollution", "SSTI"]
+  },
+  "next-auth.session-token": {
+    "stack": "Next.js / NextAuth",
+    "db": ["PostgreSQL", "MySQL"],
+    "vulns": ["Next.js middleware auth bypass (CVE-2025-29927)", "JWT / session-token weaknesses", "SSRF (image optimizer)", "open redirect"]
+  },
+  "__Secure-next-auth.session-token": {
+    "stack": "Next.js / NextAuth",
+    "db": ["PostgreSQL", "MySQL"],
+    "vulns": ["Next.js middleware auth bypass (CVE-2025-29927)", "JWT / session-token weaknesses", "SSRF (image optimizer)", "open redirect"]
+  },
+  "laravel_session": {
+    "stack": "PHP / Laravel",
+    "db": ["MySQL", "PostgreSQL"],
+    "vulns": ["PHPGGC Laravel chains", "CVE-2021-3129 Ignition RCE (debug mode)", "Mass Assignment"]
+  },
+  "symfony": {
+    "stack": "PHP / Symfony",
+    "db": ["MySQL", "PostgreSQL"],
+    "vulns": ["PHPGGC Symfony chains", "APP_SECRET leak", "_fragment RCE", "debug toolbar"]
+  },
+  "session": {
+    "stack": "Python / Flask",
+    "db": ["SQLite", "PostgreSQL", "MySQL"],
+    "vulns": ["SSTI (Jinja2)", "Flask secret brute (flask-unsign) → session forge", "Pickle deserialization"]
+  },
+  "sessionid": {
+    "stack": "Python / Django",
+    "db": ["PostgreSQL", "SQLite"],
+    "vulns": ["SSTI (Django DTL, rare)", "SECRET_KEY disclosure", "DEBUG=True information disclosure", "Pickle deserialization"]
+  },
+  "csrftoken": {
+    "stack": "Python / Django",
+    "db": ["PostgreSQL", "SQLite"],
+    "vulns": ["SECRET_KEY disclosure", "DEBUG=True information disclosure", "Pickle deserialization"]
+  },
+  "beaker.session.id": {
+    "stack": "Python / Pyramid (Beaker)",
+    "db": ["PostgreSQL", "SQLite"],
+    "vulns": ["Pickle deserialization (Beaker)", "SSTI (Mako/Chameleon)"]
+  },
+  "CFID": {
+    "stack": "Adobe ColdFusion",
+    "db": ["MSSQL", "MySQL"],
+    "vulns": ["CF deserialization", "LFI", "CVE-2023-26360 RCE"]
+  },
+  "_session_id": {
+    "stack": "Ruby on Rails",
+    "db": ["PostgreSQL", "MySQL"],
+    "vulns": ["Mass Assignment", "YAML/Marshal deserialization", "CVE-2013-0156", "secret_key_base → cookie RCE"]
+  },
+  "/_[A-Za-z0-9]+_session/": {
+    "stack": "Ruby on Rails",
+    "db": ["PostgreSQL", "MySQL"],
+    "vulns": ["Mass Assignment", "YAML/Marshal deserialization", "secret_key_base → cookie RCE"]
+  },
+  "SPRING_SECURITY_REMEMBER_ME_COOKIE": {
+    "stack": "Java / Spring Security",
+    "db": ["Oracle", "MySQL", "PostgreSQL"],
+    "vulns": ["Remember-me cookie deserialization", "Spring4Shell", "Log4Shell"]
+  },
+  "CraftSessionId": {
+    "stack": "Craft CMS",
+    "db": ["MySQL", "PostgreSQL"],
+    "vulns": ["Twig SSTI", "Known RCE CVEs"]
+  },
+  "CAKEPHP": {
+    "stack": "PHP / CakePHP",
+    "db": ["MySQL"],
+    "vulns": ["SQLi", "unserialize"]
+  },
+  "ci_session": {
+    "stack": "PHP / CodeIgniter",
+    "db": ["MySQL"],
+    "vulns": ["SQLi", "session lib misconfig"]
+  },
+  "wordpress_logged_in_*": {
+    "stack": "WordPress",
+    "db": ["MySQL", "MariaDB"],
+    "vulns": ["Vulnerable plugins / themes (WPScan)", "XML-RPC brute-force / pingback SSRF", "Admin → RCE (theme/plugin editor)", "wp-config disclosure"]
+  },
+  "wp-settings-*": {
+    "stack": "WordPress",
+    "db": ["MySQL", "MariaDB"],
+    "vulns": ["Vulnerable plugins / themes (WPScan)", "XML-RPC brute-force", "user enumeration (?author=)"]
+  },
+  "/S?SESS[0-9a-f]{10,}/": {
+    "stack": "Drupal",
+    "db": ["MySQL", "PostgreSQL"],
+    "vulns": ["Drupalgeddon2 (CVE-2018-7600)", "Drupalgeddon3 (CVE-2018-7602)", "CVE-2014-3704 SQLi"]
+  },
+  "_gitlab_session": {
+    "stack": "GitLab",
+    "db": ["PostgreSQL"],
+    "vulns": ["Known version CVEs (RCE)", "SSRF via webhooks / imports", "account takeover CVEs"]
+  },
+  "grafana_session": {
+    "stack": "Grafana",
+    "db": [],
+    "vulns": ["Path traversal (CVE-2021-43798)", "SSRF via datasource proxy", "default credentials (admin:admin)"]
+  },
+  "atlassian.xsrf.token": {
+    "stack": "Atlassian (Jira / Confluence)",
+    "db": ["PostgreSQL", "MySQL"],
+    "vulns": ["Confluence OGNL injection RCE (CVE-2022-26134)", "Jira SSRF / info disclosure", "known version CVEs"]
+  },
+  "phpMyAdmin": {
+    "stack": "phpMyAdmin",
+    "db": ["MySQL", "MariaDB"],
+    "vulns": ["Default / weak credentials", "SQL console → file write", "known LFI / RCE CVEs"]
+  },
+  "pmaAuth-*": {
+    "stack": "phpMyAdmin",
+    "db": ["MySQL", "MariaDB"],
+    "vulns": ["Default / weak credentials", "SQL console → file write"]
+  },
+  "roundcube_sessid": {
+    "stack": "Roundcube webmail",
+    "db": ["MySQL", "PostgreSQL"],
+    "vulns": ["Known RCE CVEs", "stored XSS", "SSRF"]
+  },
+  "AWSALB": {
+    "stack": "AWS ALB (load balancer)",
+    "db": [],
+    "vulns": ["Infra hint — probe SSRF to 169.254.169.254 metadata", "find real origin behind the ALB"]
+  }
+}

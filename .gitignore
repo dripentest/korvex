@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.uv-python/
+.uv-cache/
+*.xml
+!data/*.xml
+
+# выходные артефакты сканов
+*.nmap.json
+*.dirs.json
+*.graph.html
+*.passive.json
+*.subs.json
+*.vhost.json

@@ -1,0 +1,79 @@
+{
+  "server": {
+    "Werkzeug": {
+      "stack": "Python / Flask (Werkzeug)",
+      "db": ["SQLite", "PostgreSQL", "MySQL"],
+      "vulns": ["Werkzeug debug console RCE (/console)", "Flask SSTI (Jinja2)", "Flask session forgery (weak SECRET_KEY, flask-unsign)", "Local file inclusion via parameters"]
+    },
+    "gunicorn": {
+      "stack": "Python (WSGI: Flask/Django)",
+      "db": ["PostgreSQL", "SQLite", "MySQL"],
+      "vulns": ["SSTI (Jinja2)", "Local file inclusion via parameters"]
+    },
+    "Tomcat": {
+      "stack": "Java (Apache Tomcat)",
+      "db": ["MySQL", "PostgreSQL", "Oracle"],
+      "vulns": ["Tomcat Manager default credentials (/manager/html)", "Java deserialization", "Ghostcat (CVE-2020-1938, AJP)"]
+    },
+    "Jetty": {
+      "stack": "Java (Jetty)",
+      "db": ["MySQL", "PostgreSQL"],
+      "vulns": ["Java deserialization", "Known version-specific CVEs"]
+    }
+  },
+  "x-powered-by": {
+    "PHP": {
+      "stack": "PHP",
+      "db": ["MySQL", "MariaDB"],
+      "vulns": ["SQLi", "LFI/RFI", "unserialize", "file_upload"]
+    },
+    "Express": {
+      "stack": "Node.js / Express",
+      "db": ["MongoDB", "PostgreSQL"],
+      "vulns": ["NoSQLi", "Prototype Pollution", "SSTI", "JWT"]
+    },
+    "ASP.NET": {
+      "stack": "ASP.NET",
+      "db": ["MSSQL"],
+      "vulns": ["ViewState deserialization", "padding oracle"]
+    },
+    "Next.js": {
+      "stack": "Next.js (React SSR)",
+      "db": ["PostgreSQL"],
+      "vulns": ["SSRF", "CVE Next.js middleware", "image optimizer SSRF"]
+    }
+  },
+  "x-generator": {
+    "Drupal": {
+      "stack": "Drupal CMS",
+      "db": ["MySQL", "PostgreSQL"],
+      "vulns": ["Drupalgeddon2 (CVE-2018-7600) CVSS 9.8", "Drupalgeddon3 (CVE-2018-7602)", "CVE-2014-3704 SQLi"]
+    },
+    "Joomla": {
+      "stack": "Joomla CMS",
+      "db": ["MySQL"],
+      "vulns": ["CVE-2017-8917 SQLi com_fields", "CVE-2015-8562 object injection", "CVE-2023-23752 REST API info disclosure"]
+    }
+  },
+  "x-drupal-cache": {
+    "Drupal": {
+      "stack": "Drupal CMS",
+      "db": [],
+      "vulns": ["Drupalgeddon2 (CVE-2018-7600)", "Drupalgeddon3 (CVE-2018-7602)"]
+    }
+  },
+  "x-runtime": {
+    "Rails": {
+      "stack": "Ruby on Rails",
+      "db": ["PostgreSQL", "MySQL"],
+      "vulns": ["Mass Assignment", "YAML deserialization", "secret_key_base cookie RCE"]
+    }
+  },
+  "x-aspnet-version": {
+    "ASP.NET": {
+      "stack": "ASP.NET",
+      "db": ["MSSQL"],
+      "vulns": ["ViewState deserialization", "padding oracle (MS10-070)"]
+    }
+  }
+}
