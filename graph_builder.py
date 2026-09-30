@@ -159,7 +159,7 @@ def _add_fingerprint(g: _Graph, anchor: str, fp_result: dict, analysis: dict) ->
             g.edge(anchor, dst)
 
     for db in analysis.get("db_candidates", []):
-        attach(g.node(f"db:{_slug(db)}", "db", db))
+        attach(g.node(f"{anchor}::db:{_slug(db)}", "db", db))
 
     if fp_result.get("waf"):
         wid = g.node(f"waf:{anchor}", "waf", f"WAF: {fp_result['waf']}")
@@ -168,7 +168,7 @@ def _add_fingerprint(g: _Graph, anchor: str, fp_result: dict, analysis: dict) ->
     for level, vulns in analysis.get("vulns_by_priority", {}).items():
         for v in vulns:
             vid = g.node(
-                f"vuln:{level}:{_slug(v)}",
+                f"{anchor}::vuln:{level}:{_slug(v)}",
                 "vuln",
                 v,
                 priority=level,
@@ -200,7 +200,7 @@ def _path_node(g: _Graph, anchor: str, path: str, status=None, sig=None, kind=No
     if sig:
         for h in hyps:
             hid = g.node(
-                f"hyp:{sig['priority']}:{_slug(h)}",
+                f"{anchor}::hyp:{sig['priority']}:{_slug(h)}",
                 "vuln",
                 h,
                 priority=sig["priority"],
