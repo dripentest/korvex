@@ -70,13 +70,31 @@ def run_nmap(target: str, ports: str | None) -> dict:
         Path(tmp_path).unlink(missing_ok=True)
 
 
+def _ensure_parent(path: str) -> None:
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+
+
 def _save_json(data: dict, path: str) -> None:
+    _ensure_parent(path)
     Path(path).write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"{_DIM}saved {path}{_RESET}")
 
 
 def _safe_name(target: str) -> str:
     return target.replace("/", "_").replace(":", "_")
+
+
+def _target_dir(target: str) -> str:
+    name = _safe_name(target)
+    parts = name.split(".")
+    if len(parts) == 4 and all(p.isdigit() for p in parts):
+        return name
+    base = name.rsplit(".", 1)[0] if "." in name else name
+    return base or name
+
+
+def _default_out(target: str, filename: str) -> str:
+    return str(Path(_target_dir(target)) / filename)
 
 
 def cmd_nmap(args: argparse.Namespace) -> None:
@@ -95,7 +113,7 @@ def cmd_nmap(args: argparse.Namespace) -> None:
         target_for_name = args.target
 
     nmap_data["host"] = target_for_name
-    out = args.output or f"{_safe_name(target_for_name)}.nmap.json"
+    out = args.output or _default_out(target_for_name, f"{_safe_name(target_for_name)}.nmap.json")
     _save_json(nmap_data, out)
 
     if nmap_data["ports"]:
@@ -119,7 +137,7 @@ def cmd_dirs(args: argparse.Namespace) -> None:
         print(f"! {result['error']}")
         return
 
-    out = args.output or f"{_safe_name(args.target)}-{args.port}.dirs.json"
+    out = args.output or _default_out(args.target, f"{_safe_name(args.target)}-{args.port}.dirs.json")
     _save_json(result, out)
 
     head = f"{args.target}:{args.port}"
@@ -158,7 +176,8 @@ def cmd_dirs(args: argparse.Namespace) -> None:
 
     if args.graph:
         graph = build_graph(args.target, dirs=[result])
-        gout = f"{_safe_name(args.target)}-{args.port}.graph.html"
+        gout = _default_out(args.target, f"{_safe_name(args.target)}-{args.port}.graph.html")
+        _ensure_parent(gout)
         render_to_file(graph, args.target, gout)
         print(f"\n{_DIM}graph {gout}{_RESET}")
         print(f"{_DIM}      file://{Path(gout).resolve()}{_RESET}")
@@ -194,7 +213,7 @@ def cmd_subs(args: argparse.Namespace) -> None:
         print(f"! {result['error']}")
         return
 
-    out = args.output or f"{_safe_name(args.target)}.subs.json"
+    out = args.output or _default_out(args.target, f"{_safe_name(args.target)}.subs.json")
     _save_json(result, out)
 
     head = args.target
@@ -219,7 +238,7 @@ def cmd_vhost(args: argparse.Namespace) -> None:
         print(f"! {result['error']}")
         return
 
-    out = args.output or f"{_safe_name(args.target)}-{args.port}.vhost.json"
+    out = args.output or _default_out(args.target, f"{_safe_name(args.target)}-{args.port}.vhost.json")
     _save_json(result, out)
 
     head = f"{args.target}:{args.port}"
@@ -233,7 +252,7 @@ def cmd_vhost(args: argparse.Namespace) -> None:
 
 def cmd_passive(args: argparse.Namespace) -> None:
     result = run_passive(args.target, args.port)
-    out = args.output or f"{_safe_name(args.target)}-{args.port}.passive.json"
+    out = args.output or _default_out(args.target, f"{_safe_name(args.target)}-{args.port}.passive.json")
     _save_json(result, out)
 
     head = f"{args.target}:{args.port}"
@@ -265,7 +284,8 @@ def cmd_passive(args: argparse.Namespace) -> None:
 
     if args.graph:
         graph = build_graph(args.target, dirs=[{"target": result["target"], "found": passive_paths(result)}])
-        gout = f"{_safe_name(args.target)}-{args.port}.graph.html"
+        gout = _default_out(args.target, f"{_safe_name(args.target)}-{args.port}.graph.html")
+        _ensure_parent(gout)
         render_to_file(graph, args.target, gout)
         print(f"\n{_DIM}graph {gout}{_RESET}")
         print(f"{_DIM}      file://{Path(gout).resolve()}{_RESET}")
@@ -316,7 +336,8 @@ def cmd_graph(args: argparse.Namespace) -> None:
             fingerprints.append((host, port, fp_result, analysis))
 
     graph = build_graph(args.target, subs=subs, nmap=nmaps, fingerprints=fingerprints, dirs=dirs)
-    out = args.output or f"{_safe_name(args.target)}.graph.html"
+    out = args.output or _default_out(args.target, f"{_safe_name(args.target)}.graph.html")
+    _ensure_parent(out)
     render_to_file(graph, args.target, out)
     print(f"graph  {out}   {_DIM}{len(graph['nodes'])} nodes, {len(graph['edges'])} edges{_RESET}")
     print(f"{_DIM}       file://{Path(out).resolve()}{_RESET}")
