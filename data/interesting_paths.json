@@ -2,6 +2,8 @@
   "/console": "Werkzeug debug console - RCE if enabled",
   "/.git/HEAD": "Git exposure - recover repository with git-dumper",
   "/.env": "Environment file - credentials, SECRET_KEY, API keys",
+  "/composer.json": "PHP dependencies and versions - map to known CVEs",
+  "/composer.lock": "Pinned PHP dependency versions - exact CVE matching",
   "/robots.txt": "Hidden paths and directories",
   "/wp-login.php": "WordPress - WPScan, brute-force, vulnerable plugins",
   "/administrator/": "Joomla admin panel",
