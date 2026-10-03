@@ -80,6 +80,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
   .node .box{stroke-width:1.7px}
   .node.dragging{opacity:.85}
   .node.dim{opacity:.12}
+  .node.hidden,.edge.hidden{display:none}
   .node.match .box{stroke:var(--accent);stroke-width:3px}
   .node .statusring{fill:none;stroke-width:3px;display:none}
   .node.st-test .statusring{display:block;stroke:#58a6ff}
@@ -160,6 +161,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
     <button class="b" id="addnote">＋ Note</button>
     <button class="b" id="fit">Fit</button>
     <button class="b" id="reset">Reset layout</button>
+    <button class="b" id="hidden">Hidden (0)</button>
     <button class="b" id="png">PNG</button>
   </div>
 </div>
@@ -177,7 +179,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
   <div class="lg"><span class="sw" style="background:#38b2c4"></span> Stack / DB</div>
   <div class="lg"><span class="sw" style="background:#d7263d"></span> CRITICAL · <span class="sw" style="background:#f46036"></span> HIGH · <span class="sw" style="background:#ffc857"></span> MED</div>
   <div class="lg"><span class="sw" style="background:#1f6d43"></span> Path · <span class="sw" style="background:#c9932b"></span> Auth-gated · <span class="sw" style="background:#232a38"></span> Other (hub)</div>
-  <div class="hint">Drag background to pan, wheel to zoom, drag a node to move. Double-click for details. Right-click a node for status, background for a note.</div>
+  <div class="hint">Drag background to pan, wheel to zoom, drag a node to move. Double-click for details. Right-click a node for status or to hide it; restore from "Hidden" in the toolbar. Right-click background for a note.</div>
 </div>
 <div id="menu" class="menu"></div>
 <div id="drawer"><div class="dh"><div><div class="dt" id="drtitle"></div><div class="dsub" id="drsub"></div></div><button id="drclose">✕</button></div><div class="db" id="drbody"></div></div>
@@ -194,9 +196,11 @@ const TYPE_COLORS={target:"#5b8def",subdomain:"#7d8cff",port:"#3a4250",stack:"#3
 const TYPE_LABEL={target:"TARGET",subdomain:"SUBDOMAIN",port:"PORT",stack:"STACK",db:"DATABASE",waf:"WAF",path:"PATH",gated:"AUTH-GATED (30x/401/403)",hub:"HUB",vuln:"HYPOTHESIS"};
 
 const byId={};GRAPH.nodes.forEach(n=>byId[n.id]=n);
+const NBR={};GRAPH.nodes.forEach(n=>NBR[n.id]=[]);
+GRAPH.edges.forEach(e=>{if(NBR[e.from]&&NBR[e.to]){NBR[e.from].push(e.to);NBR[e.to].push(e.from);}});
 
-let saved={pos:{},notes:[],status:{}};
-try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s){saved.pos=s.pos||{};saved.notes=s.notes||[];saved.status=s.status||{};}}catch(e){}
+let saved={pos:{},notes:[],status:{},hidden:{}};
+try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s){saved.pos=s.pos||{};saved.notes=s.notes||[];saved.status=s.status||{};saved.hidden=s.hidden||{};}}catch(e){}
 let saveT=null;
 function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(LSKEY,JSON.stringify(saved));}catch(e){}},200);}
 
@@ -384,13 +388,40 @@ function openNodeMenu(n,ev){
   let h=`<div class="mhead">${esc(String(n.label).replace(/\n/g," "))}</div>`;
   items.forEach(([k,l])=>{h+=`<div class="mi" data-st="${k}">${cur===k?"● ":""}${l}</div>`;});
   if(cur)h+=`<div class="sep"></div><div class="mi" data-st="">— Clear status</div>`;
+  if(n.type!=="target")h+=`<div class="sep"></div><div class="mi" data-act="hide">⊘ Hide node</div>`;
   menu.innerHTML=h;menu.classList.add("open");
   const mw=menu.offsetWidth,mh=menu.offsetHeight;
   menu.style.left=Math.min(ev.clientX,innerWidth-mw-8)+"px";
   menu.style.top=Math.min(ev.clientY,innerHeight-mh-8)+"px";
-  menu.querySelectorAll(".mi").forEach(mi=>mi.onclick=()=>{setStatus(n.id,mi.dataset.st||null);hideMenu();applyFilters();});
+  menu.querySelectorAll(".mi").forEach(mi=>mi.onclick=()=>{
+    if(mi.dataset.act==="hide")setHidden(n.id,true);
+    else setStatus(n.id,mi.dataset.st||null);
+    hideMenu();applyFilters();});
 }
-document.addEventListener("pointerdown",e=>{if(!e.target.closest("#menu")&&!e.target.closest(".node"))hideMenu();});
+document.addEventListener("pointerdown",e=>{if(!e.target.closest("#menu")&&!e.target.closest(".node")&&!e.target.closest("#hidden"))hideMenu();});
+
+/* ---- hide / restore nodes ---- */
+const hiddenBtn=document.getElementById("hidden");
+function setHidden(id,on){if(on)saved.hidden[id]=1;else delete saved.hidden[id];updateHiddenBtn();save();}
+function updateHiddenBtn(){hiddenBtn.textContent="Hidden ("+Object.keys(saved.hidden).length+")";}
+function openHiddenMenu(ev){
+  const ids=Object.keys(saved.hidden);
+  let h=`<div class="mhead">Hidden nodes (${ids.length})</div>`;
+  if(!ids.length){h+=`<div class="mi" style="opacity:.55;cursor:default">nothing hidden</div>`;}
+  else{ids.forEach(id=>{const nm=byId[id]?String(byId[id].label).replace(/\n/g," "):id;
+      h+=`<div class="mi" data-rid="${esc(id)}">↩ ${esc(nm)}</div>`;});
+    h+=`<div class="sep"></div><div class="mi" data-rall="1">↩ Restore all</div>`;}
+  menu.innerHTML=h;menu.classList.add("open");
+  const mw=menu.offsetWidth,mh=menu.offsetHeight;
+  menu.style.left=Math.min(ev.clientX,innerWidth-mw-8)+"px";
+  menu.style.top=Math.min(ev.clientY,innerHeight-mh-8)+"px";
+  menu.querySelectorAll(".mi").forEach(mi=>mi.onclick=()=>{
+    if(mi.dataset.rall){saved.hidden={};updateHiddenBtn();save();}
+    else if(mi.dataset.rid!==undefined)setHidden(mi.dataset.rid,false);
+    else return;
+    hideMenu();applyFilters();});
+}
+hiddenBtn.onclick=e=>openHiddenMenu(e);
 
 /* ---- search + filters ---- */
 const searchEl=document.getElementById("search"),fprioEl=document.getElementById("fprio"),fstatusEl=document.getElementById("fstatus");
@@ -403,17 +434,32 @@ function nodeMatchesPrio(n,f){if(f==="all")return true;
   return PRIO_RANK[n.priority]<=PRIO_RANK[f];}
 function nodeMatchesStatus(n,f){if(f==="all")return true;const st=saved.status[n.id];
   return f==="none"?!st:st===f;}
+function effectiveHidden(){
+  const H=Object.assign({},saved.hidden);
+  let changed=true;
+  while(changed){changed=false;
+    GRAPH.nodes.forEach(n=>{
+      if(H[n.id]||(n.type!=="vuln"&&n.type!=="db"))return;
+      const ns=NBR[n.id]||[];
+      if(ns.length&&ns.every(x=>H[x])){H[n.id]=1;changed=true;}
+    });}
+  return H;
+}
 function applyFilters(){
   const q=searchEl.value.trim().toLowerCase(),fp=fprioEl.value,fs=fstatusEl.value;
-  const vis={};
+  const H=effectiveHidden();const vis={};
   GRAPH.nodes.forEach(n=>{
+    const hid=!!H[n.id];
     const searchOn=q?nodeMatchesSearch(n,q):true;
-    const show=searchOn&&nodeMatchesPrio(n,fp)&&nodeMatchesStatus(n,fs);
+    const show=!hid&&searchOn&&nodeMatchesPrio(n,fp)&&nodeMatchesStatus(n,fs);
     vis[n.id]=show;const g=nodeEls[n.id];if(!g)return;
-    g.classList.toggle("dim",!show);
-    g.classList.toggle("match",!!q&&searchOn);
+    g.classList.toggle("hidden",hid);
+    g.classList.toggle("dim",!hid&&!show);
+    g.classList.toggle("match",!!q&&!hid&&searchOn);
   });
-  edgeEls.forEach(o=>o.p.classList.toggle("dim",!(vis[o.a.id]&&vis[o.b.id])));
+  edgeEls.forEach(o=>{const hid=!!(H[o.a.id]||H[o.b.id]);
+    o.p.classList.toggle("hidden",hid);
+    o.p.classList.toggle("dim",!hid&&!(vis[o.a.id]&&vis[o.b.id]));});
 }
 searchEl.addEventListener("input",applyFilters);
 fprioEl.addEventListener("change",applyFilters);
@@ -438,6 +484,7 @@ function exportPNG(){
   const st=document.createElementNS(SVGNS,"style");
   st.textContent="text{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-weight:600}"
     +".edge{fill:none;stroke:#46536a;stroke-width:1.5px}.edge.dim{opacity:.06}.node.dim{opacity:.12}"
+    +".node.hidden,.edge.hidden{display:none}"
     +".node .box{stroke-width:1.7px}"
     +".node .statusring{display:none;fill:none;stroke-width:3px}"
     +".node.st-test .statusring{display:block;stroke:#58a6ff}.node.st-done .statusring{display:block;stroke:#3fb950}.node.st-fail .statusring{display:block;stroke:#8b949e;stroke-dasharray:4 3}"
@@ -465,7 +512,7 @@ document.getElementById("reset").onclick=()=>askConfirm("Reset node layout to au
 addEventListener("resize",fit);
 
 /* ---- init ---- */
-renderNodes();renderEdges();renderNotes();applyFilters();fit();
+renderNodes();renderEdges();renderNotes();updateHiddenBtn();applyFilters();fit();
 </script>
 </body>
 </html>
