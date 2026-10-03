@@ -243,7 +243,7 @@ defs.innerHTML='<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWid
 const gEdges=document.createElementNS(SVGNS,"g"),gNodes=document.createElementNS(SVGNS,"g"),gNotes=document.createElementNS(SVGNS,"g");
 svg.append(defs,gEdges,gNodes,gNotes);
 function el(t,a){const e=document.createElementNS(SVGNS,t);if(a)for(const k in a)e.setAttribute(k,a[k]);return e;}
-function esc(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 
 let nodeEls={},edgeEls=[];
 function colorFor(n){return n.color||PRIORITY_COLORS[n.priority]||TYPE_COLORS[n.type]||"#3a4250";}
