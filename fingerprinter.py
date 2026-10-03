@@ -19,6 +19,19 @@ _CONTROL_CHARS_RE = re.compile(r"[\x00-\x1f\x7f]")
 def _sanitize(value: str) -> str:
     return _CONTROL_CHARS_RE.sub("", value)
 
+
+def _cookie_flags(jar) -> list[dict]:
+    flags = []
+    for c in jar:
+        rest = {k.lower(): v for k, v in (getattr(c, "_rest", None) or {}).items()}
+        flags.append({
+            "name": _sanitize(c.name),
+            "httponly": "httponly" in rest,
+            "secure": bool(c.secure),
+            "samesite": rest.get("samesite") or None,
+        })
+    return flags
+
 FOUND_STATUSES = {200, 201, 204, 301, 302, 303, 307, 308, 401, 403}
 
 TRACKED_HEADERS = [
@@ -60,6 +73,8 @@ def fingerprint_target(host: str, port: int) -> dict:
     result = {
         "headers": {h: None for h in TRACKED_HEADERS},
         "cookies": [],
+        "cookie_flags": [],
+        "secure_scheme": port in (443, 8443),
         "waf": None,
         "interesting_paths": [],
         "security_headers_missing": [],
@@ -88,6 +103,7 @@ def fingerprint_target(host: str, port: int) -> dict:
             result["headers"][h] = _sanitize(resp_headers_lower[h])
 
     result["cookies"] = [_sanitize(name) for name in resp.cookies.keys()]
+    result["cookie_flags"] = _cookie_flags(resp.cookies)
 
     result["security_headers_missing"] = [
         label for key, label in REQUIRED_SECURITY_HEADERS.items() if key not in resp_headers_lower

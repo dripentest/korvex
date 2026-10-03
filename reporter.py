@@ -58,7 +58,8 @@ def render_report(target: str, port: int, fp_result: dict, analysis: dict) -> st
         out.append(f"  {_DIM}—{_RESET}")
 
     out.append("")
-    missing = fp_result["security_headers_missing"]
+    missing = list(fp_result["security_headers_missing"])
+    missing += [f"cookie {w}" for w in analysis.get("cookie_weaknesses", [])]
     out.append(_kv("missing", " · ".join(missing) if missing else "—"))
 
     suppressed = analysis.get("suppressed", [])

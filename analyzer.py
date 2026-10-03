@@ -13,6 +13,11 @@ GATING_PATHS = [
     "/swagger", "/phpmyadmin", "/adminer", "/server-status", "/xmlrpc",
 ]
 
+_SESSION_HINTS = (
+    "phpsessid", "jsessionid", "asp.net_sessionid", "aspsessionid", "connect.sid",
+    "session", "sessid", "sid", "laravel_session", "ci_session", "symfony", "auth",
+)
+
 
 def _priority_of(vuln: str) -> str:
     vuln_lower = vuln.lower()
@@ -93,11 +98,27 @@ def analyze(fp_result: dict, open_ports: list[int] | None = None) -> dict:
     for v in all_vulns:
         vulns_by_priority[_priority_of(v)].append(v)
 
+    cookie_weaknesses = []
+    for cf in fp_result.get("cookie_flags", []):
+        name = cf.get("name", "")
+        is_session = any(h in name.lower() for h in _SESSION_HINTS)
+        if not cf.get("httponly"):
+            cookie_weaknesses.append(f"{name}: HttpOnly")
+            if is_session:
+                v = f"Session cookie stealable via XSS ({name}: HttpOnly not set)"
+                if v not in vulns_by_priority["MEDIUM"]:
+                    vulns_by_priority["MEDIUM"].append(v)
+        if fp_result.get("secure_scheme") and not cf.get("secure"):
+            cookie_weaknesses.append(f"{name}: Secure")
+        if not cf.get("samesite"):
+            cookie_weaknesses.append(f"{name}: SameSite")
+
     return {
         "matches": matches,
         "confidence": confidence,
         "confidence_note": confidence_note,
         "db_candidates": db_candidates,
         "vulns_by_priority": vulns_by_priority,
+        "cookie_weaknesses": cookie_weaknesses,
         "suppressed": suppressed,
     }
