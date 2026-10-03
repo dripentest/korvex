@@ -81,6 +81,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
   .node.dragging{opacity:.85}
   .node.dim{opacity:.12}
   .node.hidden,.edge.hidden{display:none}
+  .node .collapseglyph{display:none;font-size:11px;font-weight:800;fill:#ffcf66;paint-order:stroke;stroke:var(--bg);stroke-width:3px}
   .node.match .box{stroke:var(--accent);stroke-width:3px}
   .node .statusring{fill:none;stroke-width:3px;display:none}
   .node.st-test .statusring{display:block;stroke:#58a6ff}
@@ -162,6 +163,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
     <button class="b" id="fit">Fit</button>
     <button class="b" id="reset">Reset layout</button>
     <button class="b" id="hidden">Hidden (0)</button>
+    <button class="b" id="report">Report</button>
     <button class="b" id="png">PNG</button>
   </div>
 </div>
@@ -196,11 +198,11 @@ const TYPE_COLORS={target:"#5b8def",subdomain:"#7d8cff",port:"#3a4250",stack:"#3
 const TYPE_LABEL={target:"TARGET",subdomain:"SUBDOMAIN",port:"PORT",stack:"STACK",db:"DATABASE",waf:"WAF",path:"PATH",gated:"AUTH-GATED (30x/401/403)",hub:"HUB",vuln:"HYPOTHESIS"};
 
 const byId={};GRAPH.nodes.forEach(n=>byId[n.id]=n);
-const NBR={};GRAPH.nodes.forEach(n=>NBR[n.id]=[]);
-GRAPH.edges.forEach(e=>{if(NBR[e.from]&&NBR[e.to]){NBR[e.from].push(e.to);NBR[e.to].push(e.from);}});
+const NBR={},OUTADJ={},INADJ={};GRAPH.nodes.forEach(n=>{NBR[n.id]=[];OUTADJ[n.id]=[];INADJ[n.id]=[];});
+GRAPH.edges.forEach(e=>{if(NBR[e.from]&&NBR[e.to]){NBR[e.from].push(e.to);NBR[e.to].push(e.from);OUTADJ[e.from].push(e.to);INADJ[e.to].push(e.from);}});
 
-let saved={pos:{},notes:[],status:{},hidden:{}};
-try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s){saved.pos=s.pos||{};saved.notes=s.notes||[];saved.status=s.status||{};saved.hidden=s.hidden||{};}}catch(e){}
+let saved={pos:{},notes:[],status:{},hidden:{},collapsed:{}};
+try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s){saved.pos=s.pos||{};saved.notes=s.notes||[];saved.status=s.status||{};saved.hidden=s.hidden||{};saved.collapsed=s.collapsed||{};}}catch(e){}
 let saveT=null;
 function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(LSKEY,JSON.stringify(saved));}catch(e){}},200);}
 
@@ -266,6 +268,8 @@ function renderNodes(){
     g.insertBefore(ring,g.firstChild);
     const glyph=el("text",{class:"statusglyph",x:w/2-2,y:-h/2+2,"text-anchor":"end","dominant-baseline":"hanging"});
     g.appendChild(glyph);
+    const cg=el("text",{class:"collapseglyph",x:w/2-2,y:h/2-3,"text-anchor":"end"});
+    g.appendChild(cg);
     g.addEventListener("pointerdown",e=>startDrag(n,e));
     g.addEventListener("dblclick",e=>{e.stopPropagation();openDrawer(n);});
     g.addEventListener("contextmenu",e=>{e.preventDefault();e.stopPropagation();openNodeMenu(n,e);});
@@ -388,13 +392,23 @@ function openNodeMenu(n,ev){
   let h=`<div class="mhead">${esc(String(n.label).replace(/\n/g," "))}</div>`;
   items.forEach(([k,l])=>{h+=`<div class="mi" data-st="${k}">${cur===k?"● ":""}${l}</div>`;});
   if(cur)h+=`<div class="sep"></div><div class="mi" data-st="">— Clear status</div>`;
+  const vulnKids=(OUTADJ[n.id]||[]).filter(c=>byId[c]&&byId[c].type==="vuln");
+  if(vulnKids.length){
+    h+=`<div class="sep"></div>`;
+    h+=saved.collapsed[n.id]
+      ? `<div class="mi" data-act="expand">⊕ Expand hypotheses</div>`
+      : `<div class="mi" data-act="collapse">⊖ Collapse hypotheses (${vulnKids.length})</div>`;
+  }
   if(n.type!=="target")h+=`<div class="sep"></div><div class="mi" data-act="hide">⊘ Hide node</div>`;
   menu.innerHTML=h;menu.classList.add("open");
   const mw=menu.offsetWidth,mh=menu.offsetHeight;
   menu.style.left=Math.min(ev.clientX,innerWidth-mw-8)+"px";
   menu.style.top=Math.min(ev.clientY,innerHeight-mh-8)+"px";
   menu.querySelectorAll(".mi").forEach(mi=>mi.onclick=()=>{
-    if(mi.dataset.act==="hide")setHidden(n.id,true);
+    const a=mi.dataset.act;
+    if(a==="hide")setHidden(n.id,true);
+    else if(a==="collapse")setCollapsed(n.id,true);
+    else if(a==="expand")setCollapsed(n.id,false);
     else setStatus(n.id,mi.dataset.st||null);
     hideMenu();applyFilters();});
 }
@@ -403,6 +417,7 @@ document.addEventListener("pointerdown",e=>{if(!e.target.closest("#menu")&&!e.ta
 /* ---- hide / restore nodes ---- */
 const hiddenBtn=document.getElementById("hidden");
 function setHidden(id,on){if(on)saved.hidden[id]=1;else delete saved.hidden[id];updateHiddenBtn();save();}
+function setCollapsed(id,on){if(on)saved.collapsed[id]=1;else delete saved.collapsed[id];save();}
 function updateHiddenBtn(){hiddenBtn.textContent="Hidden ("+Object.keys(saved.hidden).length+")";}
 function openHiddenMenu(ev){
   const ids=Object.keys(saved.hidden);
@@ -434,14 +449,19 @@ function nodeMatchesPrio(n,f){if(f==="all")return true;
   return PRIO_RANK[n.priority]<=PRIO_RANK[f];}
 function nodeMatchesStatus(n,f){if(f==="all")return true;const st=saved.status[n.id];
   return f==="none"?!st:st===f;}
-function effectiveHidden(){
+function effectiveHidden(withCollapse){
+  if(withCollapse===undefined)withCollapse=true;
   const H=Object.assign({},saved.hidden);
+  const C=withCollapse?(saved.collapsed||{}):{};
   let changed=true;
   while(changed){changed=false;
     GRAPH.nodes.forEach(n=>{
       if(H[n.id]||(n.type!=="vuln"&&n.type!=="db"))return;
       const ns=NBR[n.id]||[];
-      if(ns.length&&ns.every(x=>H[x])){H[n.id]=1;changed=true;}
+      const parents=INADJ[n.id]||[];
+      const orphan=ns.length&&ns.every(x=>H[x]);
+      const collapsed=parents.length&&parents.every(p=>H[p]||C[p]);
+      if(orphan||collapsed){H[n.id]=1;changed=true;}
     });}
   return H;
 }
@@ -456,6 +476,13 @@ function applyFilters(){
     g.classList.toggle("hidden",hid);
     g.classList.toggle("dim",!hid&&!show);
     g.classList.toggle("match",!!q&&!hid&&searchOn);
+    const cg=g.querySelector(".collapseglyph");
+    if(cg){
+      if(!hid&&saved.collapsed[n.id]){
+        const kids=(OUTADJ[n.id]||[]).filter(c=>byId[c]&&byId[c].type==="vuln");
+        cg.textContent="+"+kids.length;cg.style.display="block";
+      }else{cg.textContent="";cg.style.display="none";}
+    }
   });
   edgeEls.forEach(o=>{const hid=!!(H[o.a.id]||H[o.b.id]);
     o.p.classList.toggle("hidden",hid);
@@ -504,9 +531,64 @@ function exportPNG(){
   img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(xml);
 }
 
+/* ---- markdown report + kill chain ---- */
+function mdEsc(s){return String(s).replace(/\n/g," ").replace(/\|/g,"\\|").trim();}
+function bfsTree(){
+  const depth={},pred={},q=[];
+  if(byId["target"]){depth["target"]=0;q.push("target");}
+  while(q.length){const c=q.shift();(OUTADJ[c]||[]).forEach(nx=>{if(depth[nx]===undefined){depth[nx]=depth[c]+1;pred[nx]=c;q.push(nx);}});}
+  return {depth,pred};
+}
+function breadcrumb(id,pred){const parts=[];let c=id,guard=0;
+  while(c!==undefined&&guard++<60){parts.unshift(mdEsc(byId[c]?byId[c].label:c));c=pred[c];}
+  return parts.join(" → ");}
+const STATUS_WORD={test:"testing",done:"exploited",fail:"failed"};
+function exportMarkdown(){
+  const H=effectiveHidden(false);                       // keep collapsed nodes, drop only hidden ones
+  const {depth,pred}=bfsTree();
+  let md="# Recon report — "+TARGET+"\n\n_generated "+new Date().toISOString().slice(0,16).replace("T"," ")+" UTC_\n";
+
+  const exploited=GRAPH.nodes.filter(n=>saved.status[n.id]==="done"&&!H[n.id])
+    .sort((a,b)=>(depth[a.id]||0)-(depth[b.id]||0));
+  if(exploited.length){
+    md+="\n## Kill chain\n\n";
+    exploited.forEach((n,i)=>{md+=(i+1)+". "+breadcrumb(n.id,pred)+"\n";});
+  }
+
+  md+="\n## Findings\n";
+  GRAPH.nodes.filter(n=>n.type==="port"&&!H[n.id]).forEach(port=>{
+    const parent=(INADJ[port.id]||[])[0];
+    const host=parent&&byId[parent]?(byId[parent].host||mdEsc(byId[parent].label).split(" ")[0]):TARGET;
+    const kids=(OUTADJ[port.id]||[]).map(id=>byId[id]).filter(Boolean);
+    const stacks=kids.filter(k=>k.type==="stack"&&!H[k.id]).map(k=>mdEsc(k.label));
+    md+="\n### "+host+":"+mdEsc(port.label).split(" ")[0]+(stacks.length?"  — "+stacks.join(", "):"")+"\n\n";
+    const seen={};
+    kids.filter(k=>k.type==="stack").forEach(st=>{(OUTADJ[st.id]||[]).forEach(vid=>{
+      const v=byId[vid];if(v&&v.type==="vuln"&&!H[vid]&&!seen[v.label]){seen[v.label]=1;
+        md+="- "+(v.priority?"**"+v.priority+"** ":"")+mdEsc(v.label)+"\n";}});});
+    kids.filter(k=>(k.type==="path"||k.type==="gated")&&!H[k.id]).forEach(p=>{
+      const st=saved.status[p.id];
+      const hyps=(OUTADJ[p.id]||[]).filter(id=>!H[id]).map(id=>byId[id]).filter(v=>v&&v.type==="vuln").map(v=>mdEsc(v.label));
+      let line="- "+(st?"**["+STATUS_WORD[st]+"]** ":"")+"`"+mdEsc(p.path||p.label)+"`"+(p.status?" → "+mdEsc(String(p.status)):"");
+      if(hyps.length)line+="  — "+hyps.join(" · ");
+      md+=line+"\n";});
+    kids.filter(k=>k.type==="hub"&&!H[k.id]).forEach(hb=>{md+="- _"+mdEsc(hb.label)+"_\n";});
+  });
+
+  if(saved.notes&&saved.notes.length){
+    md+="\n## Notes\n\n";saved.notes.forEach(nt=>{md+="- "+mdEsc(nt.text)+"\n";});
+  }
+
+  const blob=new Blob([md],{type:"text/markdown"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="recon-report-"+TARGET.replace(/[^a-z0-9.-]/gi,"_")+".md";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
 /* ---- controls ---- */
 document.getElementById("fit").onclick=fit;
 document.getElementById("png").onclick=exportPNG;
+document.getElementById("report").onclick=exportMarkdown;
 document.getElementById("reset").onclick=()=>askConfirm("Reset node layout to auto? Notes and statuses are kept.",()=>{
   saved.pos={};computeLayout();renderNodes();renderEdges();applyFilters();fit();save();});
 addEventListener("resize",fit);
