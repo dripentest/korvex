@@ -161,6 +161,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
     <span class="vr"></span>
     <button class="b" id="addnote">＋ Note</button>
     <button class="b" id="fit">Fit</button>
+    <button class="b" id="lanes">Swimlanes</button>
     <button class="b" id="reset">Reset layout</button>
     <button class="b" id="hidden">Hidden (0)</button>
     <button class="b" id="report">Report</button>
@@ -201,8 +202,8 @@ const byId={};GRAPH.nodes.forEach(n=>byId[n.id]=n);
 const NBR={},OUTADJ={},INADJ={};GRAPH.nodes.forEach(n=>{NBR[n.id]=[];OUTADJ[n.id]=[];INADJ[n.id]=[];});
 GRAPH.edges.forEach(e=>{if(NBR[e.from]&&NBR[e.to]){NBR[e.from].push(e.to);NBR[e.to].push(e.from);OUTADJ[e.from].push(e.to);INADJ[e.to].push(e.from);}});
 
-let saved={pos:{},notes:[],status:{},hidden:{},collapsed:{}};
-try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s){saved.pos=s.pos||{};saved.notes=s.notes||[];saved.status=s.status||{};saved.hidden=s.hidden||{};saved.collapsed=s.collapsed||{};}}catch(e){}
+let saved={pos:{},notes:[],status:{},hidden:{},collapsed:{},layout:"auto"};
+try{const s=JSON.parse(localStorage.getItem(LSKEY));if(s){saved.pos=s.pos||{};saved.notes=s.notes||[];saved.status=s.status||{};saved.hidden=s.hidden||{};saved.collapsed=s.collapsed||{};saved.layout=s.layout||"auto";}}catch(e){}
 let saveT=null;
 function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(LSKEY,JSON.stringify(saved));}catch(e){}},200);}
 
@@ -235,7 +236,35 @@ function computeLayout(){
   cols.forEach((col,d)=>{const total=(col.length-1)*ROWGAP;
     col.forEach((n,i)=>{n.x=d*COLGAP;n.y=-total/2+i*ROWGAP;delete n._bc;});});
 }
-computeLayout();
+/* ---- layout: swimlanes (one horizontal lane per host) ---- */
+function computeLayoutSwimlanes(){
+  const depth={},q=[];
+  if(byId["target"]){depth["target"]=0;q.push("target");}
+  while(q.length){const c=q.shift();(OUTADJ[c]||[]).forEach(nx=>{if(depth[nx]===undefined){depth[nx]=depth[c]+1;q.push(nx);}});}
+  GRAPH.nodes.forEach(n=>{if(depth[n.id]===undefined)depth[n.id]=1;});
+  const lane={},q2=[];
+  if(byId["target"]){lane["target"]="__root__";q2.push("target");}
+  while(q2.length){const c=q2.shift();(OUTADJ[c]||[]).forEach(nx=>{if(lane[nx]!==undefined)return;
+    lane[nx]=(byId[nx]&&byId[nx].type==="subdomain")?nx:lane[c];q2.push(nx);});}
+  GRAPH.nodes.forEach(n=>{if(lane[n.id]===undefined)lane[n.id]="__root__";});
+  const laneKeys=["__root__"];
+  GRAPH.nodes.filter(n=>n.type==="subdomain").sort((a,b)=>String(a.label).localeCompare(String(b.label))).forEach(s=>laneKeys.push(s.id));
+  const COLGAP=320,ROWGAP=66,LANEGAP=64;
+  let y=0;
+  laneKeys.forEach(k=>{
+    const nodes=GRAPH.nodes.filter(n=>lane[n.id]===k&&n.id!=="target");
+    if(!nodes.length)return;
+    const cols={};nodes.forEach(n=>{(cols[depth[n.id]]=cols[depth[n.id]]||[]).push(n);});
+    let maxRows=1;for(const d in cols)maxRows=Math.max(maxRows,cols[d].length);
+    const laneH=(maxRows-1)*ROWGAP;
+    for(const d in cols){const arr=cols[d],total=(arr.length-1)*ROWGAP;
+      arr.forEach((n,i)=>{n.x=(+d)*COLGAP;n.y=y+i*ROWGAP+(laneH-total)/2;});}
+    y+=laneH+LANEGAP;
+  });
+  if(byId["target"]){byId["target"].x=0;byId["target"].y=(y-LANEGAP)/2;}
+}
+function doLayout(){if(saved.layout==="lanes")computeLayoutSwimlanes();else computeLayout();}
+doLayout();
 GRAPH.nodes.forEach(n=>{const p=saved.pos[n.id];if(p){n.x=p.x;n.y=p.y;}});
 
 /* ---- SVG ---- */
@@ -589,11 +618,16 @@ function exportMarkdown(){
 document.getElementById("fit").onclick=fit;
 document.getElementById("png").onclick=exportPNG;
 document.getElementById("report").onclick=exportMarkdown;
-document.getElementById("reset").onclick=()=>askConfirm("Reset node layout to auto? Notes and statuses are kept.",()=>{
-  saved.pos={};computeLayout();renderNodes();renderEdges();applyFilters();fit();save();});
+document.getElementById("reset").onclick=()=>askConfirm("Reset node layout? Notes and statuses are kept.",()=>{
+  saved.pos={};doLayout();renderNodes();renderEdges();applyFilters();fit();save();});
+const lanesBtn=document.getElementById("lanes");
+function updateLanesBtn(){lanesBtn.textContent=saved.layout==="lanes"?"Auto layout":"Swimlanes";}
+lanesBtn.onclick=()=>{saved.layout=saved.layout==="lanes"?"auto":"lanes";updateLanesBtn();
+  saved.pos={};doLayout();renderNodes();renderEdges();applyFilters();fit();save();};
 addEventListener("resize",fit);
 
 /* ---- init ---- */
+updateLanesBtn();
 renderNodes();renderEdges();renderNotes();updateHiddenBtn();applyFilters();fit();
 </script>
 </body>
