@@ -33,8 +33,9 @@ and every subcommand writes JSON so stages compose freely.
 - **Auth-gated detection** — `301/302 → login`, `401`, `403` routes are surfaced as
   post-authentication targets, not dumped into noise.
 - **Interactive attack graph** — a dependency-free single-file HTML: pan/zoom, drag,
-  per-node status (testing / exploited / failed), hide/restore nodes to declutter, search,
-  priority/status filters, notes, and PNG export. State persists in `localStorage`.
+  per-node status (testing / exploited / failed), hide/restore and collapse nodes to declutter,
+  a swimlanes layout (one lane per host), search, priority/status filters, notes, a Markdown
+  report with kill chain, and PNG export. State persists in `localStorage`.
 - **Adaptive** — the graph only contains nodes for what was actually found; noise collapses
   into a single hub node so 50 discovered directories never turn it into a mess. On broad
   targets it renders the whole surface: root domain → subdomains → each host's ports → paths.
@@ -199,11 +200,14 @@ host, so a broad target renders as one graph: the root domain, every discovered 
 each host's ports, and their paths and vulnerabilities. Open it in any browser — no server required.
 
 **Graph controls:** drag background to pan, wheel to zoom, drag nodes to arrange,
-double-click for details, right-click a node to set status or **hide** it (noise directories
-disappear, and hypotheses orphaned by the hide go with them — restore any of them from the
-**Hidden** button), right-click the background to add a note. Search and the priority/status
-filters dim everything else; **PNG** exports a report-ready image. Layout, statuses, notes and
-hidden nodes are saved per target in `localStorage`.
+double-click for details, right-click a node to set status, **collapse** its hypotheses
+(they fold into a `+N` badge) or **hide** it (noise directories disappear, and hypotheses
+orphaned by the hide go with them — restore any of them from the **Hidden** button),
+right-click the background to add a note. Search and the priority/status filters dim
+everything else. **Swimlanes** switches the layout so each host gets its own horizontal lane
+(no cross-host tangle on broad targets); **Report** exports a Markdown findings report with a
+kill chain built from the nodes marked exploited; **PNG** exports a report-ready image. Layout
+choice, statuses, notes, collapsed and hidden nodes are saved per target in `localStorage`.
 
 ---
 
