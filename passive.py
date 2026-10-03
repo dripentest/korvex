@@ -24,7 +24,7 @@ _SECRET_PATTERNS = [
      "MEDIUM"),
 ]
 
-_ENDPOINT_RE = re.compile(r"""["'`](/[A-Za-z0-9_\-./]{2,120})["'`]""")
+_ENDPOINT_RE = re.compile(r"""["'`](/[A-Za-z0-9_\-./]{2,120}(?:\?[A-Za-z0-9_\-.%&=+]{1,120})?)["'`]""")
 _SCRIPT_SRC_RE = re.compile(r"""<script[^>]+src\s*=\s*['"]([^'"]+)['"]""", re.IGNORECASE)
 
 
@@ -74,7 +74,7 @@ def _locs_from_sitemap(text: str) -> list[str]:
 def _is_interesting_endpoint(p: str) -> bool:
     if p in ("/", "//") or " " in p:
         return False
-    return not p.lower().endswith(_ASSET_EXT)
+    return not p.split("?", 1)[0].lower().endswith(_ASSET_EXT)
 
 
 def run_passive(host: str, port: int) -> dict:

@@ -70,14 +70,16 @@ def _refine_hyps(hyps: list[str], kind: str | None) -> list[str]:
         return hyps
     out, seen = [], set()
     for h in hyps:
-        refined = h
+        base, sep, anno = h.partition(" [")
+        refined = base
         for (needle, k), replacement in _REFINE.items():
-            if k == kind and needle in h:
+            if k == kind and needle in base:
                 refined = replacement
                 break
-        if refined not in seen:
-            seen.add(refined)
-            out.append(refined)
+        full = refined + (sep + anno if sep else "")
+        if full not in seen:
+            seen.add(full)
+            out.append(full)
     return out
 
 

@@ -1,6 +1,7 @@
 import json
 import re
 from pathlib import Path
+from urllib.parse import parse_qsl, urlsplit
 
 _DATA_DIR = Path(__file__).parent / "data"
 
@@ -17,30 +18,71 @@ INTERESTING_PATHS = _load("interesting_paths.json")
 WAF_SIGNATURES = _load("waf_signatures.json")
 PRIORITY = _load("priority.json")
 PATH_SIGNATURES = _load("path_signatures.json")
+PARAM_SIGNATURES = _load("param_signatures.json")
 
 _PRIORITY_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 _PRIORITY_RANK = {p: i for i, p in enumerate(_PRIORITY_ORDER)}
 _PATH_KEYWORDS = PATH_SIGNATURES.get("keywords", {})
+_PARAMS = PARAM_SIGNATURES.get("params", {})
+
+_ID_SEGMENT = re.compile(
+    r"\d+|[0-9a-f]{12,}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+)
+
+_REFLECT_FIELDS = {"username", "email", "name", "user", "bio", "nickname", "displayname", "fullname"}
+_REFLECT_CONTEXT = ("register", "signup", "profile", "account", "settings", "update", "edit")
+
+
+def _has_id_segment(path_only: str) -> bool:
+    return any(seg and _ID_SEGMENT.fullmatch(seg) for seg in path_only.split("/"))
+
+
+def match_params(query: str) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    for name, _ in parse_qsl(query, keep_blank_values=True):
+        key = name.lower().strip().rstrip("[]")
+        sig = _PARAMS.get(key)
+        if sig:
+            for h in sig["hypotheses"]:
+                out.append((f"{h} [?{key}]", sig["priority"]))
+    return out
+
+
+def _context_hyps(path_lower: str, query: str) -> list[tuple[str, str]]:
+    names = {n.lower().strip().rstrip("[]") for n, _ in parse_qsl(query, keep_blank_values=True)}
+    if (names & _REFLECT_FIELDS) and any(c in path_lower for c in _REFLECT_CONTEXT):
+        return [("Stored/reflected injection via user-controlled value (SSTI/XSS)", "HIGH")]
+    return []
 
 
 def match_path(path: str) -> dict | None:
-    path_lower = path.lower()
-    hypotheses: list[str] = []
-    seen: set[str] = set()
-    best_rank = len(_PRIORITY_ORDER)
+    parts = urlsplit(path)
+    path_only = parts.path or path
+    path_lower = path_only.lower()
 
+    collected: list[tuple[str, str]] = []
     for keyword, sig in _PATH_KEYWORDS.items():
         if keyword in path_lower:
-            rank = _PRIORITY_RANK.get(sig["priority"], best_rank)
-            if rank < best_rank:
-                best_rank = rank
             for h in sig["hypotheses"]:
-                if h not in seen:
-                    seen.add(h)
-                    hypotheses.append(h)
+                collected.append((h, sig["priority"]))
+    if _has_id_segment(path_only):
+        collected.append(("IDOR / broken object-level authorization [/:id]", "HIGH"))
+    collected.extend(match_params(parts.query))
+    collected.extend(_context_hyps(path_lower, parts.query))
 
-    if not hypotheses:
+    if not collected:
         return None
+
+    seen: set[str] = set()
+    hypotheses: list[str] = []
+    best_rank = len(_PRIORITY_ORDER)
+    for h, prio in collected:
+        if h not in seen:
+            seen.add(h)
+            hypotheses.append(h)
+        rank = _PRIORITY_RANK.get(prio, best_rank)
+        if rank < best_rank:
+            best_rank = rank
 
     return {"hypotheses": hypotheses, "priority": _PRIORITY_ORDER[best_rank]}
 
