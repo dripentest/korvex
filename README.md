@@ -18,20 +18,26 @@ and every subcommand writes JSON so stages compose freely.
 
 - **Stack fingerprinting** from HTTP headers, cookies and open ports, with a confidence
   score derived from the number of independent signals.
-- **Correlation engine** — 573 path signatures + cookie/header/port databases map findings
-  to prioritized vulnerability hypotheses (CRITICAL → LOW).
+- **Correlation engine** — 573 path signatures + parameter/cookie/header/port databases map
+  findings to prioritized vulnerability hypotheses (CRITICAL → LOW).
+- **Entry-point awareness** — request parameters map to vulnerability classes (`?file` → LFI,
+  `?url` → SSRF, `?cmd` → command injection), and numeric/UUID path segments (`/user/123`)
+  are surfaced as IDOR / broken-object-level-authorization targets.
 - **Stack-aware hypotheses** — the same path is refined by the detected stack: SSTI becomes
   *Jinja2* on Python, *Twig* on PHP, *Freemarker* on Java; file upload becomes *.php/.phtml*
-  on PHP, *.jsp* on Java.
+  on PHP, *.jsp* on Java; SQL injection becomes *NoSQL* on Node.
+- **Cookie hardening checks** — missing `HttpOnly` / `Secure` / `SameSite` flags are reported,
+  and a session cookie without `HttpOnly` is flagged as stealable via XSS.
 - **Evidence-gating** — a path-specific finding (e.g. Werkzeug `/console` RCE) is suppressed
   when the tool actually checked that path and it returned 404, instead of crying wolf.
 - **Auth-gated detection** — `301/302 → login`, `401`, `403` routes are surfaced as
   post-authentication targets, not dumped into noise.
 - **Interactive attack graph** — a dependency-free single-file HTML: pan/zoom, drag,
-  per-node status (testing / exploited / failed), search, priority/status filters, notes,
-  and PNG export. State persists in `localStorage`.
+  per-node status (testing / exploited / failed), hide/restore nodes to declutter, search,
+  priority/status filters, notes, and PNG export. State persists in `localStorage`.
 - **Adaptive** — the graph only contains nodes for what was actually found; noise collapses
-  into a single hub node so 50 discovered directories never turn it into a mess.
+  into a single hub node so 50 discovered directories never turn it into a mess. On broad
+  targets it renders the whole surface: root domain → subdomains → each host's ports → paths.
 
 ---
 
@@ -79,7 +85,8 @@ alias fp='python3 /path/to/fingerprint/main.py'
 ## Usage
 
 Run `fp` (or `python3 main.py`) with no arguments for the full help. Every command
-writes its result to the current directory as JSON.
+writes its result as JSON into a **per-target folder** (`target.thm` → `target/`), so a whole
+engagement stays in one place and is removed by deleting that one folder.
 
 ### `scan` — stack + fingerprint in one run
 
@@ -112,6 +119,7 @@ target.thm:5000
   stack      Python / Flask (Werkzeug)   medium
   database   SQLite, PostgreSQL, MySQL
   server     Werkzeug/2.0.2 Python/3.10.12
+  cookies    session
 
 paths
   /debug → 200
@@ -119,10 +127,15 @@ paths
 vulns
   HIGH    Flask SSTI (Jinja2)
   HIGH    Local file inclusion via parameters
+  MEDIUM  Session cookie stealable via XSS (session: HttpOnly not set)
 
-  missing    HSTS · CSP
+  missing    HSTS · CSP · cookie session: HttpOnly
   absent     /console        # checked and not present — not reported as a finding
 ```
+
+Alongside the stack, `fingerprint` (and `scan`) actively probe a list of sensitive paths
+(`/.git/HEAD`, `/.env`, `/composer.json`, `/composer.lock`, `/console`, `/phpmyadmin/`, …)
+and inspect cookie security flags (`HttpOnly` / `Secure` / `SameSite`).
 
 ### `dirs` — content brute-force with per-path hypotheses
 
@@ -169,15 +182,15 @@ pattern-matched, never executed.
 ```bash
 # single host
 fp graph --target target.thm \
-  --nmap-json target.thm.nmap.json \
-  --dirs-json target.thm-5000.dirs.json
+  --nmap-json target/target.thm.nmap.json \
+  --dirs-json target/target.thm-5000.dirs.json
 
 # whole company: root domain -> subdomains -> their ports -> paths
 fp graph --target example.com \
-  --subs-json example.com.subs.json \
-  --nmap-json app.example.com.nmap.json --nmap-json api.example.com.nmap.json \
-  --dirs-json app.example.com-443.dirs.json --dirs-json api.example.com-443.dirs.json \
-  --passive-json app.example.com-443.passive.json
+  --subs-json example/example.com.subs.json \
+  --nmap-json app.example/app.example.com.nmap.json --nmap-json api.example/api.example.com.nmap.json \
+  --dirs-json app.example/app.example.com-443.dirs.json --dirs-json api.example/api.example.com-443.dirs.json \
+  --passive-json app.example/app.example.com-443.passive.json
 ```
 
 Merges saved results (and an optional live fingerprint) into a single self-contained HTML
@@ -186,9 +199,11 @@ host, so a broad target renders as one graph: the root domain, every discovered 
 each host's ports, and their paths and vulnerabilities. Open it in any browser — no server required.
 
 **Graph controls:** drag background to pan, wheel to zoom, drag nodes to arrange,
-double-click for details, right-click a node to set status or the background to add a note.
-Search and the priority/status filters dim everything else; **PNG** exports a report-ready
-image. Layout, statuses and notes are saved per target in `localStorage`.
+double-click for details, right-click a node to set status or **hide** it (noise directories
+disappear, and hypotheses orphaned by the hide go with them — restore any of them from the
+**Hidden** button), right-click the background to add a note. Search and the priority/status
+filters dim everything else; **PNG** exports a report-ready image. Layout, statuses, notes and
+hidden nodes are saved per target in `localStorage`.
 
 ---
 
@@ -200,6 +215,8 @@ vulnerability candidates:
 - `path_signatures.json` — 573 keyword signatures (substring-matched, so `/api/internal/users`
   matches too) covering authentication, account/access-control, admin, APIs, file operations,
   injection surfaces, SSRF, debug/dev/internal, monitoring, CMS, cloud, sensitive files and more.
+- `param_signatures.json` — request-parameter names mapped to vulnerability classes
+  (`file`/`path` → LFI, `url`/`next` → SSRF/redirect, `cmd`/`ping` → command injection, …).
 - `cookie_signatures.json` / `header_signatures.json` — framework detection (PHPSESSID → PHP,
   `connect.sid` → Node/Express, `Server: Werkzeug` → Flask, …).
 - `port_signatures.json`, `priority.json`, `waf_signatures.json`, `interesting_paths.json`.
