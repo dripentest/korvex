@@ -475,23 +475,44 @@ commands:
   passive       robots/sitemap paths + endpoints and secrets from linked JS
   graph         interactive HTML graph from saved nmap/dirs + fingerprint
 
-typical flow:
-  fp subs    --target example.com                   # live subdomains (broad target)
-  fp scan    --target host                          # what stack, where to dig
-  fp nmap    --target host -o t.nmap.json           # ports (once)
-  fp passive --target host --port 80                # robots/sitemap/JS leads (no brute)
-  fp dirs    --target host --port 80 -w wl.txt --graph
-  fp graph   --target host --nmap-json t.nmap.json --dirs-json host-80.dirs.json
+examples:
+  fp scan        --target target.thm                       # quick: nmap + fingerprint
+  fp scan        --target target.thm --no-nmap --port 5000 # port known, skip nmap
+  fp fingerprint --target target.thm --port 80,443,8080    # several ports (concurrent)
+  fp dirs        --target target.thm --port 80 -w wl.txt --graph
+  fp passive     --target target.thm --port 80             # robots/sitemap/JS (no brute)
+  fp subs        --target example.com                      # live subdomains
+  fp graph       --target target.thm --nmap-json t.nmap.json \\
+                 --dirs-json t-80.dirs.json --fingerprint-json t-80.fp.json
+
+run a tool yourself, then import its output (use any flags you like):
+  nmap -sV -sC -p- -oX s.xml target.thm
+      fp nmap  --from-xml s.xml   --target target.thm
+  feroxbuster -u http://target.thm:80 -w wl.txt --json -o fx.json
+      fp dirs  --from-ferox fx.json --target target.thm --port 80
+  ffuf -w subs.txt:FUZZ -u http://10.10.1.5/ -H 'Host: FUZZ.target.thm' -ac -of json -o vh.json
+      fp vhost --from-ffuf vh.json --target target.thm --port 80
+  subfinder -d example.com -silent -o names.txt
+      fp subs  --from-txt names.txt --target example.com
+
+parameters:
+  --port VALUE     single, list or range: 80,443,1337,8000-8100  (scan/nmap/fingerprint)
+  --proxy URL      route requests through a proxy, e.g. Burp http://127.0.0.1:8080
+  -H 'Name: val'   extra request header, repeatable (e.g. 'Authorization: Bearer <jwt>')
+  --cookie STR     cookie header for areas behind login, e.g. 'session=abc; other=1'
+  --from-xml/-ferox/-ffuf/-txt   import an existing nmap/feroxbuster/ffuf/subfinder run
+  --nmap-json      fingerprint: feed saved nmap ports into the analysis
+  --fingerprint-json  graph: render a saved fingerprint without a live re-scan
+  --graph          dirs/passive: also build the interactive HTML graph
+  -t / -d / --no-recursion   dirs: threads / recursion depth / disable recursion
+  -w / -x          dirs/vhost: wordlist / extensions ;  --ip -fs : vhost connect-host / size filter
 
 notes:
-  - subcommands are independent: fuzzing more dirs does not re-run nmap
-  - import an existing tool run instead of launching it (your own flags):
-      nmap --from-xml  ·  dirs --from-ferox  ·  vhost --from-ffuf  ·  subs --from-txt
-  - dirs: -t threads, -d recursion depth, --no-recursion, Ctrl+C saves findings
-  - per-path hypotheses (/login -> SQLi/brute), 30x/401/403 -> "auth-gated"
-  - fingerprint/scan save <target>-<port>.fp.json; graph reads it via --fingerprint-json
-  - --proxy / -H 'Name: value' / --cookie on scan/fingerprint/dirs/passive (Burp, auth)
-  - output is written to a per-target folder; `fp <command> -h` for details
+  - subcommands are independent; each writes JSON into a per-target folder (target.thm/)
+  - --proxy / -H / --cookie apply to scan, fingerprint, dirs and passive
+  - http/https is auto-detected from the port and the nmap service
+  - fingerprint/scan save <target>-<port>.fp.json; Ctrl+C in dirs saves partial findings
+  - `fp <command> -h` for the full flag list of a command
 """
 
 
