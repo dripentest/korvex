@@ -1,5 +1,32 @@
 {
   "keywords": {
+    "openid-configuration": {
+      "hypotheses": [
+        "OIDC discovery - endpoint/issuer disclosure",
+        "SSRF via discovery-advertised endpoints"
+      ],
+      "priority": "MEDIUM"
+    },
+    "oauth-authorization-server": {
+      "hypotheses": [
+        "OAuth authorization-server metadata disclosure",
+        "Weak redirect_uri / grant-type configuration"
+      ],
+      "priority": "MEDIUM"
+    },
+    "rss": {
+      "hypotheses": [
+        "RSS feed parsing - XXE / SSRF"
+      ],
+      "priority": "MEDIUM"
+    },
+    "atom": {
+      "hypotheses": [
+        "Atom feed parsing - XXE / SSRF"
+      ],
+      "priority": "MEDIUM",
+      "except": ["atomic"]
+    },
     "package-lock": {
       "hypotheses": [
         "Node dependency disclosure (exact versions -> CVE matching)"
@@ -1408,21 +1435,21 @@
     },
     "soap": {
       "hypotheses": [
-        "IDOR / broken object-level authorization",
+        "XXE via XML/SOAP body (file read, SSRF, OOB exfiltration)",
+        "XML injection",
         "HTTP method tampering / parameter fuzzing",
-        "Injection",
         "Broken function-level authorization"
       ],
-      "priority": "MEDIUM"
+      "priority": "HIGH"
     },
     "wsdl": {
       "hypotheses": [
-        "IDOR / broken object-level authorization",
+        "SOAP/WSDL service - XXE via XML body (file read, SSRF)",
+        "XML injection",
         "HTTP method tampering / parameter fuzzing",
-        "Injection",
         "Broken function-level authorization"
       ],
-      "priority": "MEDIUM"
+      "priority": "HIGH"
     },
     "rpc": {
       "hypotheses": [
@@ -2734,11 +2761,12 @@
     },
     "feed": {
       "hypotheses": [
+        "Feed parsing - XXE / SSRF (RSS/Atom fetch)",
         "Stored XSS",
-        "IDOR",
         "Server-side template injection (SSTI)"
       ],
-      "priority": "MEDIUM"
+      "priority": "MEDIUM",
+      "except": ["feedback"]
     },
     "order": {
       "hypotheses": [

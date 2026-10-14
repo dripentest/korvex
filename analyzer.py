@@ -19,6 +19,11 @@ _SESSION_HINTS = (
 )
 
 
+def _add_vuln(vulns_by_priority: dict, level: str, vuln: str) -> None:
+    if vuln not in vulns_by_priority[level]:
+        vulns_by_priority[level].append(vuln)
+
+
 def _priority_of(vuln: str) -> str:
     vuln_lower = vuln.lower()
     for level in ("CRITICAL", "HIGH", "MEDIUM", "LOW"):
@@ -112,6 +117,28 @@ def analyze(fp_result: dict, open_ports: list[int] | None = None) -> dict:
             cookie_weaknesses.append(f"{name}: Secure")
         if not cf.get("samesite"):
             cookie_weaknesses.append(f"{name}: SameSite")
+
+    cors = fp_result.get("cors")
+    if cors:
+        if cors.get("reflects_origin") and cors.get("credentials"):
+            _add_vuln(vulns_by_priority, "HIGH",
+                      "CORS: arbitrary Origin reflected with credentials (cross-origin data theft)")
+        elif cors.get("null_origin") and cors.get("credentials"):
+            _add_vuln(vulns_by_priority, "HIGH",
+                      "CORS: Origin 'null' trusted with credentials (sandboxed-iframe theft)")
+        elif cors.get("reflects_origin"):
+            _add_vuln(vulns_by_priority, "MEDIUM",
+                      "CORS: arbitrary Origin reflected (no credentials)")
+        elif cors.get("wildcard") and cors.get("credentials"):
+            _add_vuln(vulns_by_priority, "MEDIUM",
+                      "CORS: wildcard Access-Control-Allow-Origin with credentials (misconfigured)")
+        elif cors.get("wildcard"):
+            _add_vuln(vulns_by_priority, "LOW",
+                      "CORS: wildcard Access-Control-Allow-Origin")
+
+    for d in fp_result.get("deserialization", []):
+        _add_vuln(vulns_by_priority, "HIGH",
+                  f"Insecure deserialization: {d['type']} serialized object in {d['where']}")
 
     return {
         "matches": matches,

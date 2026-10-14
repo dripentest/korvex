@@ -18,7 +18,7 @@ and every subcommand writes JSON so stages compose freely.
 
 - **Stack fingerprinting** from HTTP headers, cookies and open ports, with a confidence
   score derived from the number of independent signals.
-- **Correlation engine** — 581 path signatures + parameter/cookie/header/port databases map
+- **Correlation engine** — 585 path signatures + parameter/cookie/header/port databases map
   findings to prioritized vulnerability hypotheses (CRITICAL → LOW).
 - **Entry-point awareness** — request parameters map to vulnerability classes (`?file` → LFI,
   `?url` → SSRF, `?cmd` → command injection), and numeric/UUID path segments (`/user/123`)
@@ -28,6 +28,12 @@ and every subcommand writes JSON so stages compose freely.
   on PHP, *.jsp* on Java; SQL injection becomes *NoSQL* on Node.
 - **Cookie hardening checks** — missing `HttpOnly` / `Secure` / `SameSite` flags are reported,
   and a session cookie without `HttpOnly` is flagged as stealable via XSS.
+- **Class-aware vuln signals** — SSRF/OAuth parameters (`?img_url`, `?redirect_uri`,
+  `?response_type`, …) and functional endpoints (`/oauth/authorize`, `/soap`, `/graphql`,
+  `/webhook`) map to SSRF / XXE / OAuth / deserialization hypotheses. Two signals that static
+  signatures can't express are probed live: a **permissive CORS** policy (reflected / `null` /
+  `*` Origin, with credentials) and **serialized objects in cookies** (PHP `O:`, Java `rO0`,
+  Python pickle, ASP.NET `__VIEWSTATE`) flagged as insecure deserialization.
 - **Evidence-gating** — a path-specific finding (e.g. Werkzeug `/console` RCE) is suppressed
   when the tool actually checked that path and it returned 404, instead of crying wolf.
 - **Auth-gated detection** — `301/302 → login`, `401`, `403` routes are surfaced as
@@ -151,7 +157,10 @@ information-disclosure files across stacks:
 - **backups / CI / infra** — `/backup.sql`, `/dump.sql`, `/docker-compose.yml`,
   `/.gitlab-ci.yml`, `/terraform.tfstate`
 
-It also inspects cookie security flags (`HttpOnly` / `Secure` / `SameSite`).
+It also inspects cookie security flags (`HttpOnly` / `Secure` / `SameSite`), probes the CORS
+policy by sending a throwaway `Origin` and checking whether it is reflected (or `null` / `*`)
+together with `Access-Control-Allow-Credentials`, and inspects cookie values for serialized
+objects (PHP / Java / Python pickle) and `__VIEWSTATE` — both reported as findings.
 
 ### `dirs` — content brute-force with per-path hypotheses
 
@@ -239,13 +248,15 @@ choice, statuses, notes, collapsed and hidden nodes are saved per target in `loc
 **Signature databases** (`data/*.json`) map observations to stack, database and
 vulnerability candidates:
 
-- `path_signatures.json` — 581 keyword signatures (substring-matched, so `/api/internal/users`
+- `path_signatures.json` — 585 keyword signatures (substring-matched, so `/api/internal/users`
   matches too; a keyword may carry an `except` list to avoid a collision, e.g. `compose`
   does not fire inside `composer.json`) covering authentication, account/access-control, admin,
   APIs, file operations, injection surfaces, SSRF, debug/dev/internal, monitoring, CMS, cloud,
   sensitive files and more.
 - `param_signatures.json` — request-parameter names mapped to vulnerability classes
-  (`file`/`path` → LFI, `url`/`next` → SSRF/redirect, `cmd`/`ping` → command injection, …).
+  (`file`/`path` → LFI, `url`/`img_url`/`webhook` → SSRF, `cmd`/`ping` → command injection,
+  `redirect_uri`/`response_type`/`state` → OAuth abuse, `soap`/`xml` → XXE,
+  `object`/`viewstate` → insecure deserialization, …).
 - `cookie_signatures.json` / `header_signatures.json` — framework detection (PHPSESSID → PHP,
   `connect.sid` → Node/Express, `Server: Werkzeug` → Flask, …).
 - `port_signatures.json`, `priority.json`, `waf_signatures.json`, `interesting_paths.json`.
