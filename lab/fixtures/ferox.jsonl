@@ -1,7 +1,0 @@
-{"type":"response","status":200,"url":"http://127.0.0.1:8002/composer.json","path":"/composer.json","content_length":40}
-{"type":"response","status":200,"url":"http://127.0.0.1:8002/.env","path":"/.env","content_length":30}
-{"type":"response","status":302,"url":"http://127.0.0.1:8002/admin","path":"/admin","content_length":0}
-{"type":"response","status":403,"url":"http://127.0.0.1:8002/phpmyadmin/","path":"/phpmyadmin/","content_length":9}
-{"type":"response","status":200,"url":"http://127.0.0.1:8002/graphql","path":"/graphql","content_length":12}
-{"type":"response","status":404,"url":"http://127.0.0.1:8002/nope","path":"/nope","content_length":3}
-{"type":"statistics","status":0}

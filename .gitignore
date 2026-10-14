@@ -18,3 +18,6 @@ venv/
 
 # personal notes — not for the repo
 docs/
+
+# local test lab — not for the repo
+lab/
