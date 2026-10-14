@@ -97,10 +97,9 @@ those artifacts into `target.thm/target.thm.graph.html` — open it in any brows
 | `graph` | merge saved artifacts into an interactive attack graph |
 
 Every tool-launching command can **import** a run you made yourself
-(`--from-xml` / `--from-ferox` / `--from-ffuf` / `--from-txt`). Full flags,
-examples (incl. `nmap` / `feroxbuster` / `ffuf`) and end-to-end workflows:
-**[docs/COMMANDS.md](docs/COMMANDS.md)**. Run `korvex -h` or `korvex <command> -h` for
-inline help.
+(`--from-xml` / `--from-ferox` / `--from-ffuf` / `--from-txt`). Run `korvex -h` or
+`korvex <command> -h` for the full flags, examples (incl. `nmap` / `feroxbuster` /
+`ffuf`) and end-to-end workflows.
 
 ---
 
@@ -112,9 +111,8 @@ vulnerabilities, gates path-specific findings on actual presence, and refines
 generic hypotheses with the detected stack. The result is a node/edge graph
 rendered by a dependency-free HTML engine.
 
-The core loop — *discovered path → `match_path()` → prioritised, stack-refined
-hypotheses → graph nodes* — and the full module/data layout are documented in
-**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
+The core loop is *discovered path → `match_path()` → prioritised, stack-refined
+hypotheses → graph nodes*.
 
 ---
 
@@ -134,6 +132,18 @@ helpers.
 
 ## Disclaimer
 
-For use only against systems you are explicitly authorised to test — CTF/lab
-boxes, your own infrastructure, or engagements with written permission. You are
-responsible for how you use it.
+This tool is provided for authorised security testing and educational use only.
+Use it **only** against systems you own or have explicit, written permission to
+test (CTF/lab boxes, your own infrastructure, or a scoped engagement).
+
+**All responsibility for using this tool lies entirely with the user.** You are
+solely responsible for ensuring your use is legal and authorised. Running it
+against systems without permission may be illegal. The authors and contributors
+accept no liability for any misuse, damage, or consequences arising from its use,
+and provide no warranty of any kind — see the [license](LICENSE).
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
