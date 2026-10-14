@@ -1,6 +1,6 @@
 # Architecture
 
-Stack Fingerprinter is a modular web-reconnaissance toolkit. Its job is to turn
+Korvex is a modular web-reconnaissance toolkit. Its job is to turn
 raw recon output — open ports, HTTP headers, cookies, discovered paths — into
 **prioritised, stack-aware attack hypotheses** and render them as an interactive
 attack graph. This document describes how the pieces fit together.

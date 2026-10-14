@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stack-Fingerprinter test lab. One persona per container, selected by $PERSONA.
+"""Korvex test lab. One persona per container, selected by $PERSONA.
 
 Pure stdlib (runs on the imported lab-base image). Each persona is crafted to
 exercise a specific detection path or a known weak point (see

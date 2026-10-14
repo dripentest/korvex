@@ -1,4 +1,4 @@
-# Stack Fingerprinter
+# Korvex
 
 A modular web-reconnaissance toolkit that fingerprints a target's technology
 stack, brute-forces and discovers content, correlates every finding into
@@ -61,7 +61,7 @@ pip install -r requirements.txt        # only: requests
 Optional alias so it runs from anywhere:
 
 ```bash
-alias fp='python3 /path/to/fingerprint/main.py'
+alias korvex='python3 /path/to/korvex/main.py'
 ```
 
 ---
@@ -69,10 +69,10 @@ alias fp='python3 /path/to/fingerprint/main.py'
 ## Quick start
 
 ```bash
-fp scan    --target target.thm                              # stack + where to dig
-fp dirs    --target target.thm --port 80 -w wordlist.txt    # content + per-path hypotheses
-fp passive --target target.thm --port 80                    # robots/sitemap/JS leads
-fp graph   --target target.thm \
+korvex scan    --target target.thm                              # stack + where to dig
+korvex dirs    --target target.thm --port 80 -w wordlist.txt    # content + per-path hypotheses
+korvex passive --target target.thm --port 80                    # robots/sitemap/JS leads
+korvex graph   --target target.thm \
            --nmap-json target.thm/target.thm.nmap.json \
            --dirs-json target.thm/target.thm-80.dirs.json \
            --fingerprint-json target.thm/target.thm-80.fp.json
@@ -99,7 +99,7 @@ those artifacts into `target.thm/target.thm.graph.html` — open it in any brows
 Every tool-launching command can **import** a run you made yourself
 (`--from-xml` / `--from-ferox` / `--from-ffuf` / `--from-txt`). Full flags,
 examples (incl. `nmap` / `feroxbuster` / `ffuf`) and end-to-end workflows:
-**[docs/COMMANDS.md](docs/COMMANDS.md)**. Run `fp -h` or `fp <command> -h` for
+**[docs/COMMANDS.md](docs/COMMANDS.md)**. Run `korvex -h` or `korvex <command> -h` for
 inline help.
 
 ---

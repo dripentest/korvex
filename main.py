@@ -476,24 +476,24 @@ commands:
   graph         interactive HTML graph from saved nmap/dirs + fingerprint
 
 examples:
-  fp scan        --target target.thm                       # quick: nmap + fingerprint
-  fp scan        --target target.thm --no-nmap --port 5000 # port known, skip nmap
-  fp fingerprint --target target.thm --port 80,443,8080    # several ports (concurrent)
-  fp dirs        --target target.thm --port 80 -w wl.txt --graph
-  fp passive     --target target.thm --port 80             # robots/sitemap/JS (no brute)
-  fp subs        --target example.com                      # live subdomains
-  fp graph       --target target.thm --nmap-json t.nmap.json \\
+  korvex scan        --target target.thm                       # quick: nmap + fingerprint
+  korvex scan        --target target.thm --no-nmap --port 5000 # port known, skip nmap
+  korvex fingerprint --target target.thm --port 80,443,8080    # several ports (concurrent)
+  korvex dirs        --target target.thm --port 80 -w wl.txt --graph
+  korvex passive     --target target.thm --port 80             # robots/sitemap/JS (no brute)
+  korvex subs        --target example.com                      # live subdomains
+  korvex graph       --target target.thm --nmap-json t.nmap.json \\
                  --dirs-json t-80.dirs.json --fingerprint-json t-80.fp.json
 
 run a tool yourself, then import its output (use any flags you like):
   nmap -sV -sC -p- -oX s.xml target.thm
-      fp nmap  --from-xml s.xml   --target target.thm
+      korvex nmap  --from-xml s.xml   --target target.thm
   feroxbuster -u http://target.thm:80 -w wl.txt --json -o fx.json
-      fp dirs  --from-ferox fx.json --target target.thm --port 80
+      korvex dirs  --from-ferox fx.json --target target.thm --port 80
   ffuf -w subs.txt:FUZZ -u http://10.10.1.5/ -H 'Host: FUZZ.target.thm' -ac -of json -o vh.json
-      fp vhost --from-ffuf vh.json --target target.thm --port 80
+      korvex vhost --from-ffuf vh.json --target target.thm --port 80
   subfinder -d example.com -silent -o names.txt
-      fp subs  --from-txt names.txt --target example.com
+      korvex subs  --from-txt names.txt --target example.com
 
 parameters:
   --port VALUE     single, list or range: 80,443,1337,8000-8100  (scan/nmap/fingerprint)
@@ -512,7 +512,7 @@ notes:
   - --proxy / -H / --cookie apply to scan, fingerprint, dirs and passive
   - http/https is auto-detected from the port and the nmap service
   - fingerprint/scan save <target>-<port>.fp.json; Ctrl+C in dirs saves partial findings
-  - `fp <command> -h` for the full flag list of a command
+  - `korvex <command> -h` for the full flag list of a command
 """
 
 
@@ -525,8 +525,8 @@ def _add_http_opts(p: argparse.ArgumentParser) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="fp",
-        description="Stack Fingerprinter - stack detection, directory brute-forcing, vulnerability prioritization, attack graph.",
+        prog="korvex",
+        description="Korvex - stack detection, directory brute-forcing, vulnerability prioritization, attack graph.",
         epilog=_HELP_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

@@ -162,7 +162,7 @@ def _baseline_statuses(session: requests.Session, base_url: str) -> set[int]:
 def fingerprint_target(host: str, port: int, scheme: str | None = None,
                        proxies: dict | None = None, headers: dict | None = None) -> dict:
     session = requests.Session()
-    session.headers.update({"User-Agent": "stack-fingerprinter/1.0"})
+    session.headers.update({"User-Agent": "korvex/1.0"})
     if headers:
         session.headers.update(headers)
     if proxies:

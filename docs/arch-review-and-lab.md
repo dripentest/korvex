@@ -1,4 +1,4 @@
-# Stack Fingerprinter — Architectural Review & Docker Test Lab
+# Korvex — Architectural Review & Docker Test Lab
 
 > Living document. Section 1 is the architectural review (weak points, ranked).
 > Section 2 is the Docker lab that exercises every command. Section 3 is the

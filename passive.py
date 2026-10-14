@@ -30,7 +30,7 @@ _SCRIPT_SRC_RE = re.compile(r"""<script[^>]+src\s*=\s*['"]([^'"]+)['"]""", re.IG
 
 def _new_session(proxies: dict | None = None, headers: dict | None = None) -> requests.Session:
     s = requests.Session()
-    s.headers.update({"User-Agent": "stack-fingerprinter/1.0"})
+    s.headers.update({"User-Agent": "korvex/1.0"})
     if headers:
         s.headers.update(headers)
     if proxies:
