@@ -17,14 +17,12 @@ def parse_nmap_xml(path: str) -> dict:
     if root.tag != "nmaprun":
         raise NmapParseError(f"{path} does not look like nmap -oX output (root tag: {root.tag})")
 
-    result = {"ports": [], "os": "", "address": ""}
-
+    hosts = []
     for host in root.findall("host"):
-        if not result["address"]:
-            address_el = host.find("address")
-            if address_el is not None:
-                result["address"] = address_el.get("addr", "")
+        address_el = host.find("address")
+        address = address_el.get("addr", "") if address_el is not None else ""
 
+        ports = []
         ports_el = host.find("ports")
         if ports_el is not None:
             for port_el in ports_el.findall("port"):
@@ -38,16 +36,27 @@ def parse_nmap_xml(path: str) -> dict:
                 version = service_el.get("version", "") if service_el is not None else ""
                 version_str = f"{product} {version}".strip()
 
-                result["ports"].append({
+                ports.append({
                     "port": int(port_el.get("portid")),
                     "service": service_name,
                     "version": version_str,
                 })
 
+        os_name = ""
         os_el = host.find("os")
-        if os_el is not None and not result["os"]:
+        if os_el is not None:
             osmatch = os_el.find("osmatch")
             if osmatch is not None:
-                result["os"] = osmatch.get("name", "")
+                os_name = osmatch.get("name", "")
 
-    return result
+        hosts.append({"address": address, "os": os_name, "ports": ports})
+
+    # Flat shape = first host (back-compat for the single-host common case);
+    # `hosts` keeps every host's own ports so multi-host scans are not blended.
+    first = hosts[0] if hosts else {"address": "", "os": "", "ports": []}
+    return {
+        "ports": first["ports"],
+        "os": first["os"],
+        "address": first["address"],
+        "hosts": hosts,
+    }

@@ -1,4 +1,4 @@
-from signatures import INTERESTING_PATHS, match_path
+from signatures import INTERESTING_PATHS, match_path, refine_hypotheses, stack_kind
 
 PRIORITY_COLORS = {
     "CRITICAL": "\033[31m",
@@ -31,9 +31,15 @@ def render_report(target: str, port: int, fp_result: dict, analysis: dict) -> st
         out.append(f"  error  {fp_result['error']}")
         return "\n".join(out) + "\n"
 
-    stack = " · ".join(dict.fromkeys(m["stack"] for m in analysis["matches"])) or "—"
+    _stacks = list(dict.fromkeys(m["stack"] for m in analysis["matches"]))
+    _stacks = [s for s in _stacks if not any(o != s and s in o for o in _stacks)]
+    stack = " · ".join(_stacks) or "—"
     conf = analysis["confidence"].lower()
-    out.append(_kv("stack", f"{stack}   {_DIM}{conf}{_RESET}" if analysis["matches"] else "—"))
+    src = fp_result.get("stack_source")
+    stack_line = f"{stack}   {_DIM}{conf}{_RESET}" if analysis["matches"] else "—"
+    if src and analysis["matches"]:
+        stack_line += f"   {_DIM}via {src}{_RESET}"
+    out.append(_kv("stack", stack_line))
     out.append(_kv("database", ", ".join(analysis["db_candidates"]) or "—"))
     out.append(_kv("waf", fp_result.get("waf") or "—"))
     server = fp_result["headers"].get("server")
@@ -45,6 +51,7 @@ def render_report(target: str, port: int, fp_result: dict, analysis: dict) -> st
     if fp_result["interesting_paths"]:
         out.append("")
         out.append(_label("paths"))
+        kind = stack_kind(_stacks[0]) if _stacks else None
         rows = []
         for entry in fp_result["interesting_paths"]:
             path = entry.split(" ", 1)[0]
@@ -53,8 +60,10 @@ def render_report(target: str, port: int, fp_result: dict, analysis: dict) -> st
         for entry, path, sig in rows:
             if sig:
                 tag = f"{PRIORITY_COLORS.get(sig['priority'], '')}{sig['priority']:<{_PW}}{_RESET}"
+                prios = sig.get("hyp_priorities") or [sig["priority"]] * len(sig["hypotheses"])
+                hyps, _ = refine_hypotheses(sig["hypotheses"], prios, kind)
                 out.append(f"  {tag}{entry}")
-                out.append(f"          {_DIM}{' · '.join(sig['hypotheses'])}{_RESET}")
+                out.append(f"          {_DIM}{' · '.join(hyps)}{_RESET}")
             else:
                 out.append(f"  {'':<{_PW}}{entry}")
                 note = INTERESTING_PATHS.get(path)

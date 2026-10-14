@@ -109,6 +109,49 @@ def match_path(path: str) -> dict | None:
         "priority": _PRIORITY_ORDER[best_rank],
     }
 
+_REFINE = {
+    ("Unrestricted file upload", "php"): "Unrestricted file upload (.php/.phtml/.phar webshell)",
+    ("Unrestricted file upload", "java"): "Unrestricted file upload (.jsp/.war webshell)",
+    ("Unrestricted file upload", "node"): "Unrestricted file upload (path traversal/overwrite; no PHP shell)",
+    ("Unrestricted file upload", "dotnet"): "Unrestricted file upload (.aspx/.asmx webshell)",
+    ("template injection", "python"): "Server-side template injection - Jinja2 ({{7*7}})",
+    ("template injection", "php"): "Server-side template injection - Twig/Smarty",
+    ("template injection", "java"): "Server-side template injection - Freemarker/Velocity",
+    ("template injection", "ruby"): "Server-side template injection - ERB/Slim",
+    ("template injection", "node"): "Server-side template injection - EJS/Pug/Handlebars",
+    ("SQL / NoSQL injection", "node"): "NoSQL injection ($ne/$gt/$regex/$where)",
+    ("SQL / NoSQL injection", "php"): "SQL injection",
+    ("SQL / NoSQL injection", "python"): "SQL injection",
+    ("SQL / NoSQL injection", "java"): "SQL injection",
+    ("SQL / NoSQL injection", "dotnet"): "SQL injection (MSSQL)",
+    ("Local file inclusion", "php"): "Local file inclusion (php://filter, log poisoning, /proc/self/environ)",
+    ("SQL/NoSQL injection", "node"): "NoSQL injection ($ne/$gt/$regex/$where)",
+    ("SQL/NoSQL injection", "php"): "SQL injection",
+}
+
+
+def refine_hypotheses(hyps: list[str], prios: list[str], kind: str | None) -> tuple[list[str], list[str]]:
+    """Refine hypothesis text for the detected stack (SSTI→Jinja2 on Python, …),
+    keeping each hypothesis aligned with its own priority. Shared by the graph and
+    the console report so both show the same stack-refined leads."""
+    if not kind or not hyps:
+        return list(hyps), list(prios)
+    out, out_p, seen = [], [], set()
+    for h, p in zip(hyps, prios):
+        base, sep, anno = h.partition(" [")
+        refined = base
+        for (needle, k), replacement in _REFINE.items():
+            if k == kind and needle in base:
+                refined = replacement
+                break
+        full = refined + (sep + anno if sep else "")
+        if full not in seen:
+            seen.add(full)
+            out.append(full)
+            out_p.append(p)
+    return out, out_p
+
+
 SPRING_BOOT_SIGNATURE = {
     "stack": "Spring Boot",
     "db": [],

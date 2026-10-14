@@ -1,7 +1,7 @@
 import re
 from urllib.parse import urlsplit
 
-from signatures import INTERESTING_PATHS, match_path, stack_kind
+from signatures import INTERESTING_PATHS, match_path, refine_hypotheses, stack_kind
 
 PRIORITY_COLORS = {
     "CRITICAL": "#d7263d",
@@ -42,48 +42,6 @@ def _gated_hint(status) -> str:
 
 def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_") or "x"
-
-
-_REFINE = {
-    ("Unrestricted file upload", "php"): "Unrestricted file upload (.php/.phtml/.phar webshell)",
-    ("Unrestricted file upload", "java"): "Unrestricted file upload (.jsp/.war webshell)",
-    ("Unrestricted file upload", "node"): "Unrestricted file upload (path traversal/overwrite; no PHP shell)",
-    ("Unrestricted file upload", "dotnet"): "Unrestricted file upload (.aspx/.asmx webshell)",
-    ("template injection", "python"): "Server-side template injection - Jinja2 ({{7*7}})",
-    ("template injection", "php"): "Server-side template injection - Twig/Smarty",
-    ("template injection", "java"): "Server-side template injection - Freemarker/Velocity",
-    ("template injection", "ruby"): "Server-side template injection - ERB/Slim",
-    ("template injection", "node"): "Server-side template injection - EJS/Pug/Handlebars",
-    ("SQL / NoSQL injection", "node"): "NoSQL injection ($ne/$gt/$regex/$where)",
-    ("SQL / NoSQL injection", "php"): "SQL injection",
-    ("SQL / NoSQL injection", "python"): "SQL injection",
-    ("SQL / NoSQL injection", "java"): "SQL injection",
-    ("SQL / NoSQL injection", "dotnet"): "SQL injection (MSSQL)",
-    ("Local file inclusion", "php"): "Local file inclusion (php://filter, log poisoning, /proc/self/environ)",
-    ("SQL/NoSQL injection", "node"): "NoSQL injection ($ne/$gt/$regex/$where)",
-    ("SQL/NoSQL injection", "php"): "SQL injection",
-}
-
-
-def _refine_hyps(hyps: list[str], prios: list[str], kind: str | None) -> tuple[list[str], list[str]]:
-    """Refine hypothesis text by stack, keeping each hypothesis aligned with its
-    own priority (so refinement/dedup never collapses per-hyp severity)."""
-    if not kind or not hyps:
-        return hyps, prios
-    out, out_p, seen = [], [], set()
-    for h, p in zip(hyps, prios):
-        base, sep, anno = h.partition(" [")
-        refined = base
-        for (needle, k), replacement in _REFINE.items():
-            if k == kind and needle in base:
-                refined = replacement
-                break
-        full = refined + (sep + anno if sep else "")
-        if full not in seen:
-            seen.add(full)
-            out.append(full)
-            out_p.append(p)
-    return out, out_p
 
 
 class _Graph:
@@ -194,7 +152,7 @@ def _path_node(g: _Graph, anchor: str, path: str, status=None, sig=None, kind=No
     hyps = hyp_prios = None
     if sig:
         prios = sig.get("hyp_priorities") or [sig["priority"]] * len(sig["hypotheses"])
-        hyps, hyp_prios = _refine_hyps(sig["hypotheses"], prios, kind)
+        hyps, hyp_prios = refine_hypotheses(sig["hypotheses"], prios, kind)
     pid = g.node(
         f"{anchor}::path:{path}",
         "path",

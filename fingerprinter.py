@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlsplit
 import requests
 import urllib3
 
-from signatures import INTERESTING_PATHS, match_waf
+from signatures import HEADER_SIGNATURES, INTERESTING_PATHS, match_cookie, match_waf
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -96,6 +96,18 @@ def _detect_serialized(cookies, body: str | None) -> list[dict]:
     return out
 
 
+def _stack_detected(headers: dict, cookies: list) -> bool:
+    """True if the collected headers/cookies already reveal a framework (so a
+    generic `Server: nginx` with no framework signal does NOT count as detected)."""
+    for hname, hval in headers.items():
+        if not hval:
+            continue
+        for needle in HEADER_SIGNATURES.get(hname, {}):
+            if needle.lower() in hval.lower():
+                return True
+    return any(match_cookie(c) for c in cookies)
+
+
 def _classify_cors(headers_lower: dict) -> dict | None:
     """Flag a permissive CORS policy from the response to a probe Origin."""
     acao = headers_lower.get("access-control-allow-origin")
@@ -153,6 +165,7 @@ def fingerprint_target(host: str, port: int) -> dict:
         "interesting_paths": [],
         "soft404_baseline": [],
         "security_headers_missing": [],
+        "stack_source": None,
         "error": None,
     }
 
@@ -190,6 +203,27 @@ def fingerprint_target(host: str, port: int) -> dict:
     except Exception:
         body = ""
     result["deserialization"] = _detect_serialized(session.cookies, body)
+
+    # A2: the root revealed no stack signal (bare page / SPA shell). Try a few
+    # common deeper routes and adopt the first that exposes a framework header or
+    # cookie, so apps that only leak their stack under /api/ aren't missed.
+    if not _stack_detected(result["headers"], result["cookies"]):
+        for probe in ("/api/", "/login", "/index.php", "/home"):
+            try:
+                r = session.get(base_url + probe, timeout=TIMEOUT, verify=False, allow_redirects=False)
+            except requests.RequestException:
+                continue
+            rl = {k.lower(): v for k, v in r.headers.items()}
+            if any(h in rl for h in TRACKED_HEADERS) or len(r.cookies):
+                for h in TRACKED_HEADERS:
+                    if result["headers"][h] is None and h in rl:
+                        result["headers"][h] = _sanitize(rl[h])
+                if len(r.cookies):
+                    names = [_sanitize(n) for n in r.cookies.keys()]
+                    result["cookies"] = list(dict.fromkeys(result["cookies"] + names))
+                    result["cookie_flags"] += _cookie_flags(r.cookies)
+                result["stack_source"] = f"deep route {probe}"
+                break
 
     # CORS is checked with a dedicated, one-off request carrying a probe Origin,
     # so the Origin header never touches the path-probing session (a strict-CORS

@@ -19,6 +19,18 @@ _SESSION_HINTS = (
 )
 
 
+def _dedup_prefixes(vulns: list[str]) -> list[str]:
+    """Drop a vuln that is just a less-specific prefix of another (at a word
+    boundary), e.g. 'unserialize' when 'unserialize (PHPGGC)' is also present."""
+    out = []
+    for v in vulns:
+        if any(w != v and w.startswith(v) and w[len(v):len(v) + 1] in (" ", "(", "→", "-")
+               for w in vulns):
+            continue
+        out.append(v)
+    return out
+
+
 def _add_vuln(vulns_by_priority: dict, level: str, vuln: str) -> None:
     if vuln not in vulns_by_priority[level]:
         vulns_by_priority[level].append(vuln)
@@ -98,6 +110,8 @@ def analyze(fp_result: dict, open_ports: list[int] | None = None) -> dict:
             else:
                 kept.append(v)
         all_vulns = kept
+
+    all_vulns = _dedup_prefixes(all_vulns)
 
     vulns_by_priority = {"CRITICAL": [], "HIGH": [], "MEDIUM": [], "LOW": []}
     for v in all_vulns:

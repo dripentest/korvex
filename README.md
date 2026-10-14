@@ -92,7 +92,7 @@ alias fp='python3 /path/to/fingerprint/main.py'
 ## Usage
 
 Run `fp` (or `python3 main.py`) with no arguments for the full help. Every command
-writes its result as JSON into a **per-target folder** (`target.thm` → `target/`), so a whole
+writes its result as JSON into a **per-target folder** (`target.thm` → `target.thm/`), so a whole
 engagement stays in one place and is removed by deleting that one folder.
 
 ### `scan` — stack + fingerprint in one run
@@ -215,15 +215,15 @@ pattern-matched, never executed.
 ```bash
 # single host
 fp graph --target target.thm \
-  --nmap-json target/target.thm.nmap.json \
-  --dirs-json target/target.thm-5000.dirs.json
+  --nmap-json target.thm/target.thm.nmap.json \
+  --dirs-json target.thm/target.thm-5000.dirs.json
 
 # whole company: root domain -> subdomains -> their ports -> paths
 fp graph --target example.com \
-  --subs-json example/example.com.subs.json \
-  --nmap-json app.example/app.example.com.nmap.json --nmap-json api.example/api.example.com.nmap.json \
-  --dirs-json app.example/app.example.com-443.dirs.json --dirs-json api.example/api.example.com-443.dirs.json \
-  --passive-json app.example/app.example.com-443.passive.json
+  --subs-json example.com/example.com.subs.json \
+  --nmap-json app.example.com/app.example.com.nmap.json --nmap-json api.example.com/api.example.com.nmap.json \
+  --dirs-json app.example.com/app.example.com-443.dirs.json --dirs-json api.example.com/api.example.com-443.dirs.json \
+  --passive-json app.example.com/app.example.com-443.passive.json
 ```
 
 Merges saved results (and an optional live fingerprint) into a single self-contained HTML
@@ -285,6 +285,18 @@ graph_builder.py   build the adaptive attack graph (nodes/edges)
 renderer.py        standalone interactive HTML graph engine
 reporter.py        minimalist console report
 data/*.json        signature databases
+```
+
+---
+
+## Tests
+
+Pure-stdlib `unittest`, no extra dependencies — they cover the matching engine
+(keyword collisions, per-hypothesis priority, id-segment heuristics, params,
+stack refinement) and the parsing/active-check helpers:
+
+```bash
+python3 -m unittest discover -s tests
 ```
 
 ---

@@ -2,6 +2,7 @@
 import argparse
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import toolrunner
@@ -83,12 +84,10 @@ def _safe_name(target: str) -> str:
 
 
 def _target_dir(target: str) -> str:
-    name = _safe_name(target)
-    parts = name.split(".")
-    if len(parts) == 4 and all(p.isdigit() for p in parts):
-        return name
-    base = name.rsplit(".", 1)[0] if "." in name else name
-    return base or name
+    # One folder per host, named after the host verbatim (e.g. target.thm ->
+    # target.thm/, app.example.com -> app.example.com/). No label stripping — the
+    # output path always matches the target the user typed.
+    return _safe_name(target) or target
 
 
 def _default_out(target: str, filename: str) -> str:
@@ -114,7 +113,13 @@ def cmd_nmap(args: argparse.Namespace) -> None:
     out = args.output or _default_out(target_for_name, f"{_safe_name(target_for_name)}.nmap.json")
     _save_json(nmap_data, out)
 
-    if nmap_data["ports"]:
+    hosts = nmap_data.get("hosts") or [{"address": nmap_data.get("address", ""), "ports": nmap_data["ports"]}]
+    if len(hosts) > 1:
+        for h in hosts:
+            label = h.get("address") or "?"
+            ports = ", ".join(str(p["port"]) for p in h["ports"]) or "—"
+            print(f"{label:<18}{ports}")
+    elif nmap_data["ports"]:
         print(f"ports  {', '.join(str(p['port']) for p in nmap_data['ports'])}")
     else:
         print(f"{_DIM}no open ports found{_RESET}")
@@ -202,12 +207,23 @@ def _load_open_ports(nmap_json: str | None) -> list[int]:
     return [p["port"] for p in data.get("ports", [])] if data else []
 
 
+def _fingerprint_ports(target: str, ports: list[int], open_ports: list[int]) -> list[tuple]:
+    """Fingerprint several ports concurrently (bounded), results in input order —
+    so a port range no longer serializes 8s-per-filtered-port timeouts."""
+    def job(port):
+        fp_result = fingerprint_target(target, port)
+        return port, fp_result, analyze(fp_result, open_ports=open_ports)
+
+    if not ports:
+        return []
+    with ThreadPoolExecutor(max_workers=min(8, len(ports))) as pool:
+        return list(pool.map(job, ports))
+
+
 def cmd_fingerprint(args: argparse.Namespace) -> None:
     ports = _parse_ports(args.port)
     open_ports = _load_open_ports(args.nmap_json) or ports
-    for port in ports:
-        fp_result = fingerprint_target(args.target, port)
-        analysis = analyze(fp_result, open_ports=open_ports)
+    for port, fp_result, analysis in _fingerprint_ports(args.target, ports, open_ports):
         print(render_report(args.target, port, fp_result, analysis))
 
 
@@ -310,7 +326,16 @@ def cmd_graph(args: argparse.Namespace) -> None:
     nmaps = []
     for path in args.nmap_json or []:
         nd = _load_json_file(path)
-        if nd:
+        if not nd:
+            continue
+        # A multi-host scan expands into one routed entry per host so their ports
+        # are not collapsed onto a single node.
+        hosts = nd.get("hosts")
+        if hosts and len(hosts) > 1:
+            for h in hosts:
+                nmaps.append({"host": h.get("address"), "address": h.get("address"),
+                              "os": h.get("os", ""), "ports": h.get("ports", [])})
+        else:
             nmaps.append(nd)
 
     dirs = []
@@ -339,14 +364,16 @@ def cmd_graph(args: argparse.Namespace) -> None:
                     jobs.append((host, p["port"]))
         for port in args.port or []:
             jobs.append((args.target, port))
-        seen = set()
-        for host, port in jobs:
-            if (host, port) in seen:
-                continue
-            seen.add((host, port))
+        uniq = list(dict.fromkeys(jobs))
+
+        def gjob(hp):
+            host, port = hp
             fp_result = fingerprint_target(host, port)
-            analysis = analyze(fp_result, open_ports=host_open.get(host) or [port])
-            fingerprints.append((host, port, fp_result, analysis))
+            return host, port, fp_result, analyze(fp_result, open_ports=host_open.get(host) or [port])
+
+        if uniq:
+            with ThreadPoolExecutor(max_workers=min(8, len(uniq))) as pool:
+                fingerprints = list(pool.map(gjob, uniq))
 
     graph = build_graph(args.target, subs=subs, nmap=nmaps, fingerprints=fingerprints, dirs=dirs)
     out = args.output or _default_out(args.target, f"{_safe_name(args.target)}.graph.html")
@@ -374,9 +401,7 @@ def cmd_scan(args: argparse.Namespace) -> None:
             print(f"{_DIM}no HTTP services found. Ports: {open_ports}{_RESET}")
             return
 
-    for port in http_ports:
-        fp_result = fingerprint_target(args.target, port)
-        analysis = analyze(fp_result, open_ports=open_ports)
+    for port, fp_result, analysis in _fingerprint_ports(args.target, http_ports, open_ports):
         print(render_report(args.target, port, fp_result, analysis))
 
 

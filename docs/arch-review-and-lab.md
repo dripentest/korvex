@@ -223,11 +223,48 @@ exits 2 (no traceback); a reversed range prints `! ignoring reversed port range`
 and is skipped.
 - **Lab re-verify:** `--port abc` → clean exit 2; `--port 100-1` → warn + continue.
 
-### Not changed (documented as limitations)
-A2 (root-only fingerprint), A6 (multi-host XML blend), A7 (filtered-port timeout),
-A10 (`_target_dir` mangling), A12 (no test suite), and the cosmetic near-duplicate
-labels are left as-is for a later pass — none produce wrong/dangerous output, only
-reduced coverage or redundancy.
+### FIX A2 — deep-route stack fallback ✅
+When the root exposes no framework signal (`_stack_detected` checks header/cookie
+signatures, so a bare `Server: nginx` does not count), the fingerprinter probes
+`/api/ /login /index.php /home` and adopts the first that reveals a framework
+header/cookie; the report shows `via deep route /api/`.
+- **Lab:** `deep-headers` → `Node.js / Express … via deep route /api/`; `flask`
+  still detected from root (no needless extra probe).
+
+### FIX A6 — multi-host nmap no longer blended ✅
+`parse_nmap_xml` keeps the flat first-host shape (back-compat) **and** adds a
+`hosts` list (each host's own ports/os). `nmap` prints per host; `graph` expands a
+multi-host file into one routed node per host.
+- **Lab:** `nmap --from-xml nmap-multihost.xml` → `10.0.0.1 80,22` / `10.0.0.2
+  5432,8080`; graph shows two host nodes.
+
+### FIX A7 — port fingerprinting parallelised ✅
+`_fingerprint_ports` (and the `graph` fingerprint jobs) run on a bounded
+`ThreadPoolExecutor` (≤8), results in input order. 12 ports: 3.9 s → 1.9 s;
+filtered ports no longer serialise 8 s timeouts.
+
+### FIX A10 — output folder = verbatim host ✅
+`_target_dir` returns the full safe host name (`target.thm/`, `app.example.com/`),
+no label stripping — the path always matches the typed target. README updated.
+
+### FIX M5 — stack refinement shared by graph and console ✅
+`refine_hypotheses` moved to `signatures.py`; both the graph and the
+`fingerprint`/`scan` console now show stack-refined leads (SSTI→Jinja2 on Python,
+Twig on PHP, …).
+
+### FIX (cosmetic) — near-duplicate labels removed ✅
+`analyzer._dedup_prefixes` drops a vuln that is only a less-specific prefix of
+another (`unserialize` vs `unserialize (PHPGGC)`); the report collapses a stack
+label contained in a more specific one (`Python / Flask` vs `… (Werkzeug)`).
+
+### FIX A12 — test suite added ✅
+`tests/` (stdlib `unittest`, no new deps) locks in the matching engine and every
+fix above: run `python3 -m unittest discover -s tests`.
+
+### Not fixed — by design
+- **M3:** parameter hypotheses need a query string; directory brute-forcing yields
+  bare paths, so `param_signatures` is fed by `passive` JS endpoints, not `dirs`.
+  Inherent to what dir brute-forcing is — not a code defect.
 
 ---
 
