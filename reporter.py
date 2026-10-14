@@ -1,9 +1,13 @@
+from signatures import INTERESTING_PATHS, match_path
+
 PRIORITY_COLORS = {
     "CRITICAL": "\033[31m",
     "HIGH": "\033[33m",
     "MEDIUM": "\033[36m",
     "LOW": "\033[32m",
 }
+
+_PRIORITY_ORDER = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, None: 4}
 _RESET = "\033[0m"
 _DIM = "\033[2m"
 _BOLD = "\033[1m"
@@ -41,8 +45,21 @@ def render_report(target: str, port: int, fp_result: dict, analysis: dict) -> st
     if fp_result["interesting_paths"]:
         out.append("")
         out.append(_label("paths"))
+        rows = []
         for entry in fp_result["interesting_paths"]:
-            out.append(f"  {entry}")
+            path = entry.split(" ", 1)[0]
+            rows.append((entry, path, match_path(path)))
+        rows.sort(key=lambda r: _PRIORITY_ORDER.get(r[2]["priority"] if r[2] else None, 4))
+        for entry, path, sig in rows:
+            if sig:
+                tag = f"{PRIORITY_COLORS.get(sig['priority'], '')}{sig['priority']:<{_PW}}{_RESET}"
+                out.append(f"  {tag}{entry}")
+                out.append(f"          {_DIM}{' · '.join(sig['hypotheses'])}{_RESET}")
+            else:
+                out.append(f"  {'':<{_PW}}{entry}")
+                note = INTERESTING_PATHS.get(path)
+                if note:
+                    out.append(f"          {_DIM}{note}{_RESET}")
 
     out.append("")
     out.append(_label("vulns"))

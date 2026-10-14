@@ -5,7 +5,7 @@ brute-forces and discovers content, correlates every finding into prioritized
 attack hypotheses, and renders the whole picture as an interactive attack graph.
 
 It wraps the standard recon tools (`nmap`, `feroxbuster`, `subfinder`, `ffuf`) behind
-one consistent CLI, and adds a correlation engine of **570+ signatures** that turns raw
+one consistent CLI, and adds a correlation engine of **580+ signatures** that turns raw
 scan output ("here is a path, here is a header") into actionable, stack-aware leads
 ("`/compose` on a Flask app → server-side template injection via Jinja2").
 
@@ -18,7 +18,7 @@ and every subcommand writes JSON so stages compose freely.
 
 - **Stack fingerprinting** from HTTP headers, cookies and open ports, with a confidence
   score derived from the number of independent signals.
-- **Correlation engine** — 573 path signatures + parameter/cookie/header/port databases map
+- **Correlation engine** — 581 path signatures + parameter/cookie/header/port databases map
   findings to prioritized vulnerability hypotheses (CRITICAL → LOW).
 - **Entry-point awareness** — request parameters map to vulnerability classes (`?file` → LFI,
   `?url` → SSRF, `?cmd` → command injection), and numeric/UUID path segments (`/user/123`)
@@ -134,9 +134,24 @@ vulns
   absent     /console        # checked and not present — not reported as a finding
 ```
 
-Alongside the stack, `fingerprint` (and `scan`) actively probe a list of sensitive paths
-(`/.git/HEAD`, `/.env`, `/composer.json`, `/composer.lock`, `/console`, `/phpmyadmin/`, …)
-and inspect cookie security flags (`HttpOnly` / `Secure` / `SameSite`).
+Alongside the stack, `fingerprint` (and `scan`) actively probe ~65 sensitive paths and
+report each one found with its severity and hypotheses (like `dirs` does). The set covers
+information-disclosure files across stacks:
+
+- **secrets / config** — `/.env`, `/.env.local`, `/config.php`, `/appsettings.json`,
+  `/web.config`, `/.aws/credentials`, `/secrets.json`
+- **dependency manifests** (version recon → CVEs) — `/composer.json`, `/composer.lock`,
+  `/package.json`, `/package-lock.json`, `/yarn.lock`, `/requirements.txt`, `/pom.xml`,
+  `/build.gradle`, `/Gemfile.lock`
+- **VCS exposure** — `/.git/HEAD`, `/.git/config`, `/.svn/entries`, `/.DS_Store`
+- **GraphQL** — `/graphql`, `/graphiql`, `/graphql-playground`, `/altair`, `/v1/graphql`
+- **API specs** — `/swagger.json`, `/openapi.json`, `/api-docs`, `/v2/api-docs`
+- **framework debug / profilers** — `/phpinfo.php`, `/_profiler`, `/telescope`,
+  `/trace.axd`, `/elmah.axd`, `/server-status`, `/metrics`
+- **backups / CI / infra** — `/backup.sql`, `/dump.sql`, `/docker-compose.yml`,
+  `/.gitlab-ci.yml`, `/terraform.tfstate`
+
+It also inspects cookie security flags (`HttpOnly` / `Secure` / `SameSite`).
 
 ### `dirs` — content brute-force with per-path hypotheses
 
@@ -224,7 +239,7 @@ choice, statuses, notes, collapsed and hidden nodes are saved per target in `loc
 **Signature databases** (`data/*.json`) map observations to stack, database and
 vulnerability candidates:
 
-- `path_signatures.json` — 573 keyword signatures (substring-matched, so `/api/internal/users`
+- `path_signatures.json` — 581 keyword signatures (substring-matched, so `/api/internal/users`
   matches too) covering authentication, account/access-control, admin, APIs, file operations,
   injection surfaces, SSRF, debug/dev/internal, monitoring, CMS, cloud, sensitive files and more.
 - `param_signatures.json` — request-parameter names mapped to vulnerability classes

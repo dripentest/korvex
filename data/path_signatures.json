@@ -1,5 +1,55 @@
 {
   "keywords": {
+    "package-lock": {
+      "hypotheses": [
+        "Node dependency disclosure (exact versions -> CVE matching)"
+      ],
+      "priority": "LOW"
+    },
+    "yarn.lock": {
+      "hypotheses": [
+        "Node dependency disclosure (exact versions -> CVE matching)"
+      ],
+      "priority": "LOW"
+    },
+    "pipfile": {
+      "hypotheses": [
+        "Python dependency disclosure (version recon -> CVE matching)"
+      ],
+      "priority": "LOW"
+    },
+    "pom.xml": {
+      "hypotheses": [
+        "Java/Maven dependency disclosure (version recon -> CVE matching)"
+      ],
+      "priority": "LOW"
+    },
+    "build.gradle": {
+      "hypotheses": [
+        "Java/Gradle dependency disclosure (version recon -> CVE matching)"
+      ],
+      "priority": "LOW"
+    },
+    "bower.json": {
+      "hypotheses": [
+        "Front-end dependency disclosure (version recon -> CVE matching)"
+      ],
+      "priority": "LOW"
+    },
+    "elmah.axd": {
+      "hypotheses": [
+        "ASP.NET ELMAH error log (requests, cookies, stack traces)",
+        "Information disclosure"
+      ],
+      "priority": "HIGH"
+    },
+    "altair": {
+      "hypotheses": [
+        "GraphQL IDE exposed (schema introspection)",
+        "Injection"
+      ],
+      "priority": "MEDIUM"
+    },
     "login": {
       "hypotheses": [
         "SQL/NoSQL injection (authentication bypass)",
