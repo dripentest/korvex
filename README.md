@@ -240,8 +240,10 @@ choice, statuses, notes, collapsed and hidden nodes are saved per target in `loc
 vulnerability candidates:
 
 - `path_signatures.json` — 581 keyword signatures (substring-matched, so `/api/internal/users`
-  matches too) covering authentication, account/access-control, admin, APIs, file operations,
-  injection surfaces, SSRF, debug/dev/internal, monitoring, CMS, cloud, sensitive files and more.
+  matches too; a keyword may carry an `except` list to avoid a collision, e.g. `compose`
+  does not fire inside `composer.json`) covering authentication, account/access-control, admin,
+  APIs, file operations, injection surfaces, SSRF, debug/dev/internal, monitoring, CMS, cloud,
+  sensitive files and more.
 - `param_signatures.json` — request-parameter names mapped to vulnerability classes
   (`file`/`path` → LFI, `url`/`next` → SSRF/redirect, `cmd`/`ping` → command injection, …).
 - `cookie_signatures.json` / `header_signatures.json` — framework detection (PHPSESSID → PHP,

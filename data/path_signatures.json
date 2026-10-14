@@ -2458,7 +2458,11 @@
         "Server-side template injection (RCE)",
         "Stored XSS"
       ],
-      "priority": "HIGH"
+      "priority": "HIGH",
+      "except": [
+        "composer",
+        "docker-compose"
+      ]
     },
     "compile": {
       "hypotheses": [
@@ -3219,7 +3223,10 @@
         "Relaxed security controls",
         "Data exposure in pre-production environment"
       ],
-      "priority": "MEDIUM"
+      "priority": "MEDIUM",
+      "except": [
+        "actuator"
+      ]
     },
     "internal": {
       "hypotheses": [

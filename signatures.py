@@ -62,9 +62,15 @@ def match_path(path: str) -> dict | None:
 
     collected: list[tuple[str, str]] = []
     for keyword, sig in _PATH_KEYWORDS.items():
-        if keyword in path_lower:
-            for h in sig["hypotheses"]:
-                collected.append((h, sig["priority"]))
+        if keyword not in path_lower:
+            continue
+        # Opt-in collision guard: a keyword may list substrings that, when present,
+        # mean this match is a longer word, not the token we want (e.g. "compose"
+        # inside "composer.json"). Keywords without "except" are unaffected.
+        if any(ex in path_lower for ex in sig.get("except", ())):
+            continue
+        for h in sig["hypotheses"]:
+            collected.append((h, sig["priority"]))
     if _has_id_segment(path_only):
         collected.append(("IDOR / broken object-level authorization [/:id]", "HIGH"))
     collected.extend(match_params(parts.query))
