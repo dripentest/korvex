@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 import argparse
 import json
-import shutil
-import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
+import toolrunner
 from analyzer import analyze
 from dir_bruteforce import load_dir_bruteforce, run_dir_bruteforce
 from fingerprinter import fingerprint_target
@@ -37,37 +35,30 @@ def _parse_ports(spec) -> list[int]:
 
 
 def run_nmap(target: str, ports: str | None) -> dict:
-    if shutil.which("nmap") is None:
+    empty = {"ports": [], "os": "", "address": target}
+    if not toolrunner.has_tool("nmap"):
         print("! nmap not found in PATH - skipping nmap scan, using HTTP only.", file=sys.stderr)
-        return {"ports": [], "os": "", "address": target}
+        return empty
 
-    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as tmp:
-        tmp_path = tmp.name
+    with toolrunner.temp_output(".xml") as tmp_path:
+        cmd = ["nmap", "-sV", "-sC", "-oX", tmp_path]
+        if ports:
+            cmd += ["-p", str(ports)]
+        cmd.append(target)
 
-    cmd = ["nmap", "-sV", "-sC", "-oX", tmp_path]
-    if ports:
-        cmd += ["-p", str(ports)]
-    cmd.append(target)
+        print(f"{_DIM}nmap {target}{_RESET}")
+        sys.stdout.flush()
+        err, _ = toolrunner.run(cmd, timeout=300, label="nmap")
+        if err:
+            print(f"! {err}", file=sys.stderr)
+            return empty
+        print()
 
-    print(f"{_DIM}nmap {target}{_RESET}")
-    sys.stdout.flush()
-    try:
-        subprocess.run(cmd, check=True, timeout=300)
-    except subprocess.CalledProcessError:
-        print("! nmap exited with an error (see output above).", file=sys.stderr)
-        return {"ports": [], "os": "", "address": target}
-    except subprocess.TimeoutExpired:
-        print("! nmap timed out (300s)", file=sys.stderr)
-        return {"ports": [], "os": "", "address": target}
-    print()
-
-    try:
-        return parse_nmap_xml(tmp_path)
-    except NmapParseError as exc:
-        print(f"! could not parse nmap output: {exc}", file=sys.stderr)
-        return {"ports": [], "os": "", "address": target}
-    finally:
-        Path(tmp_path).unlink(missing_ok=True)
+        try:
+            return parse_nmap_xml(tmp_path)
+        except NmapParseError as exc:
+            print(f"! could not parse nmap output: {exc}", file=sys.stderr)
+            return empty
 
 
 def _ensure_parent(path: str) -> None:

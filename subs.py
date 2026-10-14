@@ -1,6 +1,4 @@
-import shutil
 import socket
-import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -8,6 +6,7 @@ from pathlib import Path
 import requests
 import urllib3
 
+import toolrunner
 from fingerprinter import _sanitize
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -45,18 +44,17 @@ def _check(sub: str) -> tuple[list[str] | None, dict | None]:
 def run_subs(domain: str, timeout: int = SUBFINDER_TIMEOUT, threads: int = LIVENESS_WORKERS) -> dict:
     result = {"domain": domain, "found": 0, "live": [], "resolved_no_web": [], "dead": 0, "error": None}
 
-    if shutil.which("subfinder") is None:
+    if not toolrunner.has_tool("subfinder"):
         result["error"] = "subfinder not found in PATH"
         print(f"! {result['error']} - install from github.com/projectdiscovery/subfinder", file=sys.stderr)
         return result
 
     print(f"\033[2msubfinder -d {domain}\033[0m")
     sys.stdout.flush()
-    try:
-        proc = subprocess.run(["subfinder", "-d", domain, "-silent"],
-                              capture_output=True, text=True, timeout=timeout)
-    except subprocess.TimeoutExpired:
-        result["error"] = f"subfinder timed out ({timeout}s)"
+    err, proc = toolrunner.run(["subfinder", "-d", domain, "-silent"],
+                               timeout=timeout, label="subfinder", capture=True, check=False)
+    if err:
+        result["error"] = err
         print(f"! {result['error']}", file=sys.stderr)
         return result
 
