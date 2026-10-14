@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -79,8 +80,27 @@ def _save_json(data: dict, path: str) -> None:
     print(f"{_DIM}saved {path}{_RESET}")
 
 
+# A target must look like a hostname/IP: it is passed as a positional argument to
+# nmap and embedded in URLs/Host headers, so a leading '-' (argument injection) or
+# whitespace/path characters are rejected rather than sanitised away.
+_TARGET_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,252}$")
+_SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._-]")
+
+
+def _target_arg(value: str) -> str:
+    v = value.strip()
+    if not _TARGET_RE.match(v):
+        raise argparse.ArgumentTypeError(
+            f"invalid target {value!r}: expected a hostname or IP "
+            "(letters, digits, '.', '-', '_'; no leading '-', no spaces or slashes)")
+    return v
+
+
 def _safe_name(target: str) -> str:
-    return target.replace("/", "_").replace(":", "_")
+    # Whitelist the charset and drop leading dots so a crafted target can never
+    # escape the output folder (e.g. '..', '../etc').
+    name = _SAFE_NAME_RE.sub("_", target).lstrip(".")
+    return name or "target"
 
 
 def _target_dir(target: str) -> str:
@@ -533,14 +553,14 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", metavar="{scan,nmap,fingerprint,dirs,subs,vhost,passive,graph}")
 
     p_nmap = sub.add_parser("nmap", help="nmap scan only, saves the result as JSON")
-    p_nmap.add_argument("--target", help="Target host")
+    p_nmap.add_argument("--target", type=_target_arg, help="Target host")
     p_nmap.add_argument("--port", help="Scan only these ports, comma-separated or ranges (e.g. 80,443,1337 or 8000-8100)")
     p_nmap.add_argument("--from-xml", help="Parse an existing nmap XML instead of a live scan")
     p_nmap.add_argument("-o", "--output", help="Where to save JSON (default <target>.nmap.json)")
     p_nmap.set_defaults(func=cmd_nmap)
 
     p_dirs = sub.add_parser("dirs", help="feroxbuster directory brute-force only (Ctrl+C to stop and save findings)")
-    p_dirs.add_argument("--target", required=True, help="Target host")
+    p_dirs.add_argument("--target", type=_target_arg, required=True, help="Target host")
     p_dirs.add_argument("--port", type=int, required=True, help="Target port")
     p_dirs.add_argument("-w", "--wordlist", help="Path to wordlist (required unless --from-ferox)")
     p_dirs.add_argument("--from-ferox", help="Parse an existing feroxbuster --json output instead of a live scan")
@@ -554,39 +574,39 @@ def build_parser() -> argparse.ArgumentParser:
     p_dirs.set_defaults(func=cmd_dirs)
 
     p_fp = sub.add_parser("fingerprint", help="HTTP fingerprint + report for a single port")
-    p_fp.add_argument("--target", required=True, help="Target host")
+    p_fp.add_argument("--target", type=_target_arg, required=True, help="Target host")
     p_fp.add_argument("--port", required=True, help="Target HTTP port(s), comma-separated (e.g. 80,443,8080)")
     p_fp.add_argument("--nmap-json", help="Previously saved `nmap` result - adds open ports to the analysis")
     _add_http_opts(p_fp)
     p_fp.set_defaults(func=cmd_fingerprint)
 
     p_scan = sub.add_parser("scan", help="nmap + fingerprint in one run (combined mode)")
-    p_scan.add_argument("--target", required=True, help="Target host")
+    p_scan.add_argument("--target", type=_target_arg, required=True, help="Target host")
     p_scan.add_argument("--port", help="Target port(s), comma-separated (e.g. 80,443,1337); restricts nmap or, with --no-nmap, fingerprinted directly")
     p_scan.add_argument("--no-nmap", action="store_true", help="Do not run nmap (requires --port)")
     _add_http_opts(p_scan)
     p_scan.set_defaults(func=cmd_scan)
 
     p_subs = sub.add_parser("subs", help="Subdomain enumeration via subfinder + built-in liveness check (broad targets)")
-    p_subs.add_argument("--target", required=True, help="Root domain (e.g. example.com)")
+    p_subs.add_argument("--target", type=_target_arg, required=True, help="Root domain (e.g. example.com)")
     p_subs.add_argument("--from-txt", help="Run the liveness check over subdomain names from a file (one per line) instead of running subfinder")
     p_subs.add_argument("-t", "--threads", type=int, help="Liveness-check concurrency (default 40)")
     p_subs.add_argument("-o", "--output", help="Where to save JSON (default <target>.subs.json)")
     p_subs.set_defaults(func=cmd_subs)
 
     p_vhost = sub.add_parser("vhost", help="Virtual-host brute-force via ffuf (Host-header fuzzing; for boxes)")
-    p_vhost.add_argument("--target", required=True, help="Base domain fuzzed in Host: FUZZ.<target> (e.g. target.thm)")
+    p_vhost.add_argument("--target", type=_target_arg, required=True, help="Base domain fuzzed in Host: FUZZ.<target> (e.g. target.thm)")
     p_vhost.add_argument("--port", type=int, required=True, help="Target port")
     p_vhost.add_argument("-w", "--wordlist", help="Path to subdomain wordlist (required unless --from-ffuf)")
     p_vhost.add_argument("--from-ffuf", help="Parse an existing ffuf JSON output (-of json) instead of a live scan")
-    p_vhost.add_argument("--ip", help="Connect to this IP/host instead of --target")
+    p_vhost.add_argument("--ip", type=_target_arg, help="Connect to this IP/host instead of --target")
     p_vhost.add_argument("-t", "--threads", type=int, help="Number of ffuf threads")
     p_vhost.add_argument("-fs", "--filter-size", type=int, help="Filter this response size (bytes); default is ffuf -ac auto-calibration")
     p_vhost.add_argument("-o", "--output", help="Where to save JSON (default <target>-<port>.vhost.json)")
     p_vhost.set_defaults(func=cmd_vhost)
 
     p_pass = sub.add_parser("passive", help="Passive recon: robots/sitemap paths + endpoints and secrets from linked JS")
-    p_pass.add_argument("--target", required=True, help="Target host")
+    p_pass.add_argument("--target", type=_target_arg, required=True, help="Target host")
     p_pass.add_argument("--port", type=int, required=True, help="Target HTTP port")
     p_pass.add_argument("-o", "--output", help="Where to save JSON (default <target>-<port>.passive.json)")
     p_pass.add_argument("--graph", action="store_true", help="Also build an HTML graph from discovered paths")
@@ -594,7 +614,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_pass.set_defaults(func=cmd_passive)
 
     p_graph = sub.add_parser("graph", help="Build the interactive HTML graph from saved results (subs/nmap/dirs/passive) + fingerprint")
-    p_graph.add_argument("--target", required=True, help="Root domain (graph root)")
+    p_graph.add_argument("--target", type=_target_arg, required=True, help="Root domain (graph root)")
     p_graph.add_argument("--subs-json", help="Saved `subs` result — adds subdomains under the root")
     p_graph.add_argument("--nmap-json", action="append", help="Saved `nmap` result (repeatable; routed to its host)")
     p_graph.add_argument("--dirs-json", action="append", help="Saved `dirs` result (repeatable; routed to its host)")

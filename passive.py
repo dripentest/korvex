@@ -68,6 +68,12 @@ def _paths_from_robots(text: str) -> tuple[list[str], list[str]]:
 
 
 def _locs_from_sitemap(text: str) -> list[str]:
+    # A hostile target could serve a sitemap with a DTD/entity definitions to
+    # trigger entity-expansion ("billion laughs") in the XML parser. Real sitemaps
+    # never use them, so refuse to parse any XML that declares them.
+    low = text.lower()
+    if "<!doctype" in low or "<!entity" in low:
+        return []
     try:
         root = ET.fromstring(text.encode("utf-8", "replace"))
     except Exception:

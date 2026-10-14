@@ -101,6 +101,44 @@ class TestHeaderParse(unittest.TestCase):
         self.assertEqual(main._parse_headers(["no-colon-here"], None), {})
 
 
+class TestTargetValidation(unittest.TestCase):
+    def test_valid_targets(self):
+        for t in ("target.thm", "10.0.0.1", "app.example.com", "host-1_test"):
+            self.assertEqual(main._target_arg(t), t)
+
+    def test_rejects_argument_injection_and_paths(self):
+        import argparse
+        for bad in ("-oX/tmp/x", "--script=evil", "a b", "../etc", "a/b", "a;b", "", "  "):
+            with self.assertRaises(argparse.ArgumentTypeError):
+                main._target_arg(bad)
+
+
+class TestSafeName(unittest.TestCase):
+    def test_keeps_hostnames(self):
+        self.assertEqual(main._safe_name("target.thm"), "target.thm")
+        self.assertEqual(main._safe_name("10.0.0.1"), "10.0.0.1")
+
+    def test_no_path_traversal(self):
+        for t in ("..", "../etc", "/etc/passwd", "...."):
+            n = main._safe_name(t)
+            self.assertNotIn("/", n)
+            self.assertFalse(n.startswith("."))
+
+
+class TestSitemapGuard(unittest.TestCase):
+    def test_rejects_dtd_entities(self):
+        from passive import _locs_from_sitemap
+        payload = ('<?xml version="1.0"?><!DOCTYPE lolz [<!ENTITY a "AAAA">]>'
+                   '<urlset><url><loc>http://x/&a;</loc></url></urlset>')
+        self.assertEqual(_locs_from_sitemap(payload), [])
+
+    def test_parses_clean_sitemap(self):
+        from passive import _locs_from_sitemap
+        payload = ('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+                   '<url><loc>http://x/a</loc></url></urlset>')
+        self.assertEqual(_locs_from_sitemap(payload), ["http://x/a"])
+
+
 class TestNmapMultiHost(unittest.TestCase):
     XML = """<?xml version="1.0"?><nmaprun>
       <host><address addr="10.0.0.1"/><ports>
