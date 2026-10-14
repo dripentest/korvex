@@ -15,3 +15,6 @@ venv/
 *.passive.json
 *.subs.json
 *.vhost.json
+
+# personal notes — not for the repo
+docs/
