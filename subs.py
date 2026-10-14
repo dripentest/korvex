@@ -3,6 +3,7 @@ import socket
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 
 import requests
 import urllib3
@@ -64,6 +65,32 @@ def run_subs(domain: str, timeout: int = SUBFINDER_TIMEOUT, threads: int = LIVEN
     if not subs:
         return result
 
+    return _classify_liveness(result, subs, threads)
+
+
+def run_subs_from_file(path: str, domain: str, threads: int = LIVENESS_WORKERS) -> dict:
+    """Run the liveness check over a list of subdomain names from a file (one per
+    line — e.g. a saved `subfinder -silent` run), without launching subfinder.
+    Mirrors `nmap --from-xml`. The liveness classification is the value this
+    command adds over the raw tool, so it still runs."""
+    result = {"domain": domain, "found": 0, "live": [], "resolved_no_web": [], "dead": 0, "error": None}
+
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+    except OSError as exc:
+        result["error"] = f"could not read {path}: {exc}"
+        print(f"! {result['error']}", file=sys.stderr)
+        return result
+
+    subs = sorted({_sanitize(line.strip()) for line in text.splitlines() if line.strip()})
+    result["found"] = len(subs)
+    if not subs:
+        return result
+
+    return _classify_liveness(result, subs, threads)
+
+
+def _classify_liveness(result: dict, subs: list[str], threads: int) -> dict:
     print(f"\033[2mchecking liveness of {len(subs)} names…\033[0m")
     sys.stdout.flush()
     try:

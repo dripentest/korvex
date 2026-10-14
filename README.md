@@ -143,7 +143,13 @@ and inspect cookie security flags (`HttpOnly` / `Secure` / `SameSite`).
 ```bash
 fp dirs --target target.thm --port 5000 -w wordlist.txt --graph
 fp dirs --target target.thm --port 5000 -w big.txt -t 40 -d 1   # 40 threads, shallow recursion
+fp dirs --target target.thm --port 5000 --from-ferox ferox.json  # import a feroxbuster --json run
 ```
+
+Like `nmap --from-xml`, the brute-forcing stages can **import an existing tool run**
+instead of launching the tool themselves (`dirs --from-ferox`, `vhost --from-ffuf`,
+`subs --from-txt`) — run the underlying tool with whatever flags you like, then feed its
+output in to get the correlation, hypotheses and graph on top.
 
 `Ctrl+C` stops the scan and keeps what was found. Each discovered path is correlated to
 hypotheses and grouped by severity; auth-gated routes and unsignatured noise are separated.
@@ -152,6 +158,7 @@ hypotheses and grouped by severity; auth-gated routes and unsignatured noise are
 
 ```bash
 fp subs --target example.com
+fp subs --target example.com --from-txt names.txt   # run liveness over names you already have
 ```
 
 Runs `subfinder` (passive) then resolves and HTTP-probes every name, splitting results into
@@ -162,6 +169,7 @@ one command (subfinder alone does not verify liveness).
 
 ```bash
 fp vhost --target target.thm --port 80 -w subdomains.txt --ip 10.10.1.5
+fp vhost --target target.thm --port 80 --from-ffuf ffuf.json   # import an ffuf -of json run
 ```
 
 Fuzzes the `Host` header (`Host: FUZZ.target.thm`) with `ffuf` against the box, using

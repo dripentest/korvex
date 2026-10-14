@@ -8,15 +8,15 @@ import tempfile
 from pathlib import Path
 
 from analyzer import analyze
-from dir_bruteforce import run_dir_bruteforce
+from dir_bruteforce import load_dir_bruteforce, run_dir_bruteforce
 from fingerprinter import fingerprint_target
 from graph_builder import GATED_STATUSES, build_graph
 from nmap_parser import NmapParseError, parse_nmap_xml
 from passive import passive_paths, run_passive
 from renderer import render_to_file
 from reporter import _BOLD, _DIM, _RESET, PRIORITY_COLORS, render_report
-from subs import run_subs
-from vhost import run_vhost
+from subs import run_subs, run_subs_from_file
+from vhost import load_vhost, run_vhost
 from signatures import INTERESTING_PATHS, match_path
 
 
@@ -123,15 +123,21 @@ def cmd_nmap(args: argparse.Namespace) -> None:
 
 
 def cmd_dirs(args: argparse.Namespace) -> None:
-    result = run_dir_bruteforce(
-        args.target,
-        args.port,
-        args.wordlist,
-        extensions=args.extensions.split(",") if args.extensions else None,
-        threads=args.threads,
-        depth=args.depth,
-        no_recursion=args.no_recursion,
-    )
+    if args.from_ferox:
+        result = load_dir_bruteforce(args.from_ferox, args.target, args.port)
+    else:
+        if not args.wordlist:
+            print("! provide -w/--wordlist (or --from-ferox to import an existing scan)", file=sys.stderr)
+            sys.exit(1)
+        result = run_dir_bruteforce(
+            args.target,
+            args.port,
+            args.wordlist,
+            extensions=args.extensions.split(",") if args.extensions else None,
+            threads=args.threads,
+            depth=args.depth,
+            no_recursion=args.no_recursion,
+        )
 
     if result["error"] and not result["found"]:
         print(f"! {result['error']}")
@@ -208,7 +214,10 @@ def cmd_fingerprint(args: argparse.Namespace) -> None:
 
 
 def cmd_subs(args: argparse.Namespace) -> None:
-    result = run_subs(args.target, threads=args.threads or 40)
+    if args.from_txt:
+        result = run_subs_from_file(args.from_txt, args.target, threads=args.threads or 40)
+    else:
+        result = run_subs(args.target, threads=args.threads or 40)
     if result["error"] and not result["live"] and not result["resolved_no_web"]:
         print(f"! {result['error']}")
         return
@@ -232,8 +241,14 @@ def cmd_subs(args: argparse.Namespace) -> None:
 
 
 def cmd_vhost(args: argparse.Namespace) -> None:
-    result = run_vhost(args.target, args.port, args.wordlist,
-                       connect_host=args.ip, threads=args.threads, filter_size=args.filter_size)
+    if args.from_ffuf:
+        result = load_vhost(args.from_ffuf, args.target, args.port, connect_host=args.ip)
+    else:
+        if not args.wordlist:
+            print("! provide -w/--wordlist (or --from-ffuf to import an existing scan)", file=sys.stderr)
+            sys.exit(1)
+        result = run_vhost(args.target, args.port, args.wordlist,
+                           connect_host=args.ip, threads=args.threads, filter_size=args.filter_size)
     if result["error"] and not result["found"]:
         print(f"! {result['error']}")
         return
@@ -388,6 +403,8 @@ typical flow:
 
 notes:
   - subcommands are independent: fuzzing more dirs does not re-run nmap
+  - import an existing tool run instead of launching it (your own flags):
+      nmap --from-xml  ·  dirs --from-ferox  ·  vhost --from-ffuf  ·  subs --from-txt
   - dirs: -t threads, -d recursion depth, --no-recursion, Ctrl+C saves findings
   - per-path hypotheses (/login -> SQLi/brute), 30x/401/403 -> "auth-gated"
   - output is written to the current directory; `fp <command> -h` for details
@@ -413,7 +430,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_dirs = sub.add_parser("dirs", help="feroxbuster directory brute-force only (Ctrl+C to stop and save findings)")
     p_dirs.add_argument("--target", required=True, help="Target host")
     p_dirs.add_argument("--port", type=int, required=True, help="Target port")
-    p_dirs.add_argument("-w", "--wordlist", required=True, help="Path to wordlist")
+    p_dirs.add_argument("-w", "--wordlist", help="Path to wordlist (required unless --from-ferox)")
+    p_dirs.add_argument("--from-ferox", help="Parse an existing feroxbuster --json output instead of a live scan")
     p_dirs.add_argument("-x", "--extensions", help="Comma-separated extensions (php,html,...)")
     p_dirs.add_argument("-t", "--threads", type=int, help="Number of feroxbuster threads")
     p_dirs.add_argument("-d", "--depth", type=int, help="feroxbuster recursion depth (default 4; 0 = unlimited)")
@@ -436,6 +454,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_subs = sub.add_parser("subs", help="Subdomain enumeration via subfinder + built-in liveness check (broad targets)")
     p_subs.add_argument("--target", required=True, help="Root domain (e.g. example.com)")
+    p_subs.add_argument("--from-txt", help="Run the liveness check over subdomain names from a file (one per line) instead of running subfinder")
     p_subs.add_argument("-t", "--threads", type=int, help="Liveness-check concurrency (default 40)")
     p_subs.add_argument("-o", "--output", help="Where to save JSON (default <target>.subs.json)")
     p_subs.set_defaults(func=cmd_subs)
@@ -443,7 +462,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_vhost = sub.add_parser("vhost", help="Virtual-host brute-force via ffuf (Host-header fuzzing; for boxes)")
     p_vhost.add_argument("--target", required=True, help="Base domain fuzzed in Host: FUZZ.<target> (e.g. target.thm)")
     p_vhost.add_argument("--port", type=int, required=True, help="Target port")
-    p_vhost.add_argument("-w", "--wordlist", required=True, help="Path to subdomain wordlist")
+    p_vhost.add_argument("-w", "--wordlist", help="Path to subdomain wordlist (required unless --from-ffuf)")
+    p_vhost.add_argument("--from-ffuf", help="Parse an existing ffuf JSON output (-of json) instead of a live scan")
     p_vhost.add_argument("--ip", help="Connect to this IP/host instead of --target")
     p_vhost.add_argument("-t", "--threads", type=int, help="Number of ffuf threads")
     p_vhost.add_argument("-fs", "--filter-size", type=int, help="Filter this response size (bytes); default is ffuf -ac auto-calibration")

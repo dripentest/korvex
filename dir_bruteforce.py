@@ -141,3 +141,28 @@ def run_dir_bruteforce(
 
     result["found"].sort(key=lambda e: e["path"])
     return result
+
+
+def load_dir_bruteforce(path: str, host: str, port: int) -> dict:
+    """Parse an existing feroxbuster --json output file into the pipeline schema,
+    without launching feroxbuster. Mirrors `nmap --from-xml`."""
+    result = {"target": _build_url(host, port), "found": [], "error": None, "interrupted": False}
+
+    if not Path(path).is_file():
+        result["error"] = f"feroxbuster output not found: {path}"
+        print(f"[!] {result['error']}", file=sys.stderr)
+        return result
+
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                entry = _parse_ferox_line(line)
+                if entry:
+                    result["found"].append(entry)
+    except OSError as exc:
+        result["error"] = f"could not read {path}: {exc}"
+        print(f"[!] {result['error']}", file=sys.stderr)
+        return result
+
+    result["found"].sort(key=lambda e: e["path"])
+    return result
