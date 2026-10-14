@@ -25,8 +25,8 @@ _PRIORITY_RANK = {p: i for i, p in enumerate(_PRIORITY_ORDER)}
 _PATH_KEYWORDS = PATH_SIGNATURES.get("keywords", {})
 _PARAMS = PARAM_SIGNATURES.get("params", {})
 
-_ID_SEGMENT = re.compile(
-    r"\d+|[0-9a-f]{12,}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+_HEX_ID = re.compile(
+    r"[0-9a-f]{16,}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 )
 
 _REFLECT_FIELDS = {"username", "email", "name", "user", "bio", "nickname", "displayname", "fullname"}
@@ -34,7 +34,17 @@ _REFLECT_CONTEXT = ("register", "signup", "profile", "account", "settings", "upd
 
 
 def _has_id_segment(path_only: str) -> bool:
-    return any(seg and _ID_SEGMENT.fullmatch(seg) for seg in path_only.split("/"))
+    for seg in path_only.split("/"):
+        if not seg:
+            continue
+        if seg.isdigit():
+            # A bare 4-digit year is almost always a date, not an object id.
+            if len(seg) == 4 and 1900 <= int(seg) <= 2099:
+                continue
+            return True
+        if _HEX_ID.fullmatch(seg):
+            return True
+    return False
 
 
 def match_params(query: str) -> list[tuple[str, str]]:
@@ -79,18 +89,25 @@ def match_path(path: str) -> dict | None:
     if not collected:
         return None
 
-    seen: set[str] = set()
-    hypotheses: list[str] = []
-    best_rank = len(_PRIORITY_ORDER)
+    # Keep each hypothesis at its OWN best severity (a hyp may be produced by
+    # several keywords). Previously every hypothesis inherited the path's single
+    # max priority, over-escalating lower-severity leads in the graph.
+    best_for: dict[str, int] = {}
+    order: list[str] = []
     for h, prio in collected:
-        if h not in seen:
-            seen.add(h)
-            hypotheses.append(h)
-        rank = _PRIORITY_RANK.get(prio, best_rank)
-        if rank < best_rank:
-            best_rank = rank
+        rank = _PRIORITY_RANK.get(prio, len(_PRIORITY_ORDER) - 1)
+        if h not in best_for:
+            best_for[h] = rank
+            order.append(h)
+        elif rank < best_for[h]:
+            best_for[h] = rank
 
-    return {"hypotheses": hypotheses, "priority": _PRIORITY_ORDER[best_rank]}
+    best_rank = min(best_for.values())
+    return {
+        "hypotheses": order,
+        "hyp_priorities": [_PRIORITY_ORDER[best_for[h]] for h in order],
+        "priority": _PRIORITY_ORDER[best_rank],
+    }
 
 SPRING_BOOT_SIGNATURE = {
     "stack": "Spring Boot",

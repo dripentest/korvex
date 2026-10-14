@@ -26,11 +26,18 @@ def _parse_ports(spec) -> list[int]:
         part = part.strip()
         if not part:
             continue
-        if "-" in part:
-            a, b = part.split("-", 1)
-            out.extend(range(int(a), int(b) + 1))
-        else:
-            out.append(int(part))
+        try:
+            if "-" in part:
+                a, b = (int(x) for x in part.split("-", 1))
+                if a > b:
+                    print(f"! ignoring reversed port range '{part}'", file=sys.stderr)
+                    continue
+                out.extend(range(a, b + 1))
+            else:
+                out.append(int(part))
+        except ValueError:
+            print(f"! invalid --port value '{part}' (expected a number or a-b range)", file=sys.stderr)
+            sys.exit(2)
     return out
 
 

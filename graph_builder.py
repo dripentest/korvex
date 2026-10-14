@@ -65,11 +65,13 @@ _REFINE = {
 }
 
 
-def _refine_hyps(hyps: list[str], kind: str | None) -> list[str]:
+def _refine_hyps(hyps: list[str], prios: list[str], kind: str | None) -> tuple[list[str], list[str]]:
+    """Refine hypothesis text by stack, keeping each hypothesis aligned with its
+    own priority (so refinement/dedup never collapses per-hyp severity)."""
     if not kind or not hyps:
-        return hyps
-    out, seen = [], set()
-    for h in hyps:
+        return hyps, prios
+    out, out_p, seen = [], [], set()
+    for h, p in zip(hyps, prios):
         base, sep, anno = h.partition(" [")
         refined = base
         for (needle, k), replacement in _REFINE.items():
@@ -80,7 +82,8 @@ def _refine_hyps(hyps: list[str], kind: str | None) -> list[str]:
         if full not in seen:
             seen.add(full)
             out.append(full)
-    return out
+            out_p.append(p)
+    return out, out_p
 
 
 class _Graph:
@@ -188,7 +191,10 @@ def _path_node(g: _Graph, anchor: str, path: str, status=None, sig=None, kind=No
     if sig is None:
         sig = match_path(path)
     note = INTERESTING_PATHS.get(path)
-    hyps = _refine_hyps(sig["hypotheses"], kind) if sig else None
+    hyps = hyp_prios = None
+    if sig:
+        prios = sig.get("hyp_priorities") or [sig["priority"]] * len(sig["hypotheses"])
+        hyps, hyp_prios = _refine_hyps(sig["hypotheses"], prios, kind)
     pid = g.node(
         f"{anchor}::path:{path}",
         "path",
@@ -200,13 +206,13 @@ def _path_node(g: _Graph, anchor: str, path: str, status=None, sig=None, kind=No
     )
     g.edge(anchor, pid)
     if sig:
-        for h in hyps:
+        for h, prio in zip(hyps, hyp_prios):
             hid = g.node(
-                f"{anchor}::hyp:{sig['priority']}:{_slug(h)}",
+                f"{anchor}::hyp:{prio}:{_slug(h)}",
                 "vuln",
                 h,
-                priority=sig["priority"],
-                color=PRIORITY_COLORS.get(sig["priority"]),
+                priority=prio,
+                color=PRIORITY_COLORS.get(prio),
             )
             g.edge(pid, hid)
 

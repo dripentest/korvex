@@ -1,5 +1,6 @@
 import base64
 import re
+import secrets
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urljoin, urlsplit
 
@@ -14,6 +15,7 @@ TIMEOUT = 8
 PATH_CHECK_WORKERS = 10
 MAX_SAME_HOST_REDIRECTS = 5
 CORS_PROBE_ORIGIN = "https://evil.example"
+BASELINE_PROBES = 2
 
 _CONTROL_CHARS_RE = re.compile(r"[\x00-\x1f\x7f]")
 
@@ -123,9 +125,21 @@ def _check_path(session: requests.Session, base_url: str, path: str) -> tuple[st
         return path, None
 
 
+def _baseline_statuses(session: requests.Session, base_url: str) -> set[int]:
+    """Probe random non-existent paths. Any FOUND status they return is the host's
+    catch-all (soft-404 SPA, blanket auth, strict-CORS 403, …): real path findings
+    that merely echo it are indistinguishable noise and must be suppressed."""
+    seen: set[int] = set()
+    for _ in range(BASELINE_PROBES):
+        _, status = _check_path(session, base_url, "/" + secrets.token_hex(12))
+        if status in FOUND_STATUSES:
+            seen.add(status)
+    return seen
+
+
 def fingerprint_target(host: str, port: int) -> dict:
     session = requests.Session()
-    session.headers.update({"User-Agent": "stack-fingerprinter/1.0", "Origin": CORS_PROBE_ORIGIN})
+    session.headers.update({"User-Agent": "stack-fingerprinter/1.0"})
     base_url = _build_url(host, port)
 
     result = {
@@ -137,6 +151,7 @@ def fingerprint_target(host: str, port: int) -> dict:
         "cors": None,
         "deserialization": [],
         "interesting_paths": [],
+        "soft404_baseline": [],
         "security_headers_missing": [],
         "error": None,
     }
@@ -170,19 +185,32 @@ def fingerprint_target(host: str, port: int) -> dict:
     ]
 
     result["waf"] = match_waf(resp_headers_lower, result["cookies"])
-    result["cors"] = _classify_cors(resp_headers_lower)
     try:
         body = resp.text
     except Exception:
         body = ""
     result["deserialization"] = _detect_serialized(session.cookies, body)
 
+    # CORS is checked with a dedicated, one-off request carrying a probe Origin,
+    # so the Origin header never touches the path-probing session (a strict-CORS
+    # host would otherwise 403 every probe → mass false positives).
+    try:
+        cors_resp = session.get(base_url + "/", timeout=TIMEOUT, verify=False,
+                                allow_redirects=False, headers={"Origin": CORS_PROBE_ORIGIN})
+        result["cors"] = _classify_cors({k.lower(): v for k, v in cors_resp.headers.items()})
+    except requests.RequestException:
+        pass
+
+    # Calibrate against the host's catch-all before trusting path probes.
+    baseline = _baseline_statuses(session, base_url)
+    result["soft404_baseline"] = sorted(baseline)
+
     found_paths = []
     with ThreadPoolExecutor(max_workers=PATH_CHECK_WORKERS) as pool:
         futures = {pool.submit(_check_path, session, base_url, path): path for path in INTERESTING_PATHS}
         for future in as_completed(futures):
             path, status = future.result()
-            if status in FOUND_STATUSES:
+            if status in FOUND_STATUSES and status not in baseline:
                 found_paths.append((path, status))
 
     found_paths.sort(key=lambda p: p[0])

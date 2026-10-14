@@ -74,6 +74,12 @@ def render_report(target: str, port: int, fp_result: dict, analysis: dict) -> st
     if not any_vulns:
         out.append(f"  {_DIM}—{_RESET}")
 
+    baseline = fp_result.get("soft404_baseline") or []
+    if baseline:
+        out.append("")
+        joined = ", ".join(str(s) for s in baseline)
+        out.append(_kv("soft-404", f"host returns {joined} for unknown paths — path probing suppressed"))
+
     out.append("")
     missing = list(fp_result["security_headers_missing"])
     missing += [f"cookie {w}" for w in analysis.get("cookie_weaknesses", [])]

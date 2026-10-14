@@ -1,0 +1,1 @@
+{"results":[{"input":{"FUZZ":"admin"},"status":200,"length":512,"words":40,"lines":12},{"input":{"FUZZ":"dev"},"status":403,"length":120,"words":5,"lines":3}]}
