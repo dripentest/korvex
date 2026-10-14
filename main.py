@@ -94,6 +94,32 @@ def _default_out(target: str, filename: str) -> str:
     return str(Path(_target_dir(target)) / filename)
 
 
+def _parse_headers(header_args, cookie) -> dict:
+    headers = {}
+    for raw in header_args or []:
+        if ":" not in raw:
+            print(f"! ignoring malformed --header '{raw}' (expected 'Name: value')", file=sys.stderr)
+            continue
+        k, v = raw.split(":", 1)
+        headers[k.strip()] = v.strip()
+    if cookie:
+        headers["Cookie"] = cookie
+    return headers
+
+
+def _http_opts(args: argparse.Namespace) -> tuple[dict | None, dict | None]:
+    proxy = getattr(args, "proxy", None)
+    proxies = {"http": proxy, "https": proxy} if proxy else None
+    headers = _parse_headers(getattr(args, "header", None), getattr(args, "cookie", None))
+    return proxies, (headers or None)
+
+
+def _save_fingerprint(target: str, port: int, fp_result: dict, analysis: dict) -> None:
+    data = {"host": target, "port": port, "fp": fp_result, "analysis": analysis}
+    out = _default_out(target, f"{_safe_name(target)}-{port}.fp.json")
+    _save_json(data, out)
+
+
 def cmd_nmap(args: argparse.Namespace) -> None:
     if args.from_xml:
         try:
@@ -140,6 +166,9 @@ def cmd_dirs(args: argparse.Namespace) -> None:
             threads=args.threads,
             depth=args.depth,
             no_recursion=args.no_recursion,
+            proxy=args.proxy,
+            headers=args.header,
+            cookie=args.cookie,
         )
 
     if result["error"] and not result["found"]:
@@ -207,11 +236,16 @@ def _load_open_ports(nmap_json: str | None) -> list[int]:
     return [p["port"] for p in data.get("ports", [])] if data else []
 
 
-def _fingerprint_ports(target: str, ports: list[int], open_ports: list[int]) -> list[tuple]:
+def _fingerprint_ports(target: str, ports: list[int], open_ports: list[int], *,
+                       proxies: dict | None = None, headers: dict | None = None,
+                       schemes: dict | None = None) -> list[tuple]:
     """Fingerprint several ports concurrently (bounded), results in input order —
     so a port range no longer serializes 8s-per-filtered-port timeouts."""
+    schemes = schemes or {}
+
     def job(port):
-        fp_result = fingerprint_target(target, port)
+        fp_result = fingerprint_target(target, port, scheme=schemes.get(port),
+                                       proxies=proxies, headers=headers)
         return port, fp_result, analyze(fp_result, open_ports=open_ports)
 
     if not ports:
@@ -223,8 +257,11 @@ def _fingerprint_ports(target: str, ports: list[int], open_ports: list[int]) -> 
 def cmd_fingerprint(args: argparse.Namespace) -> None:
     ports = _parse_ports(args.port)
     open_ports = _load_open_ports(args.nmap_json) or ports
-    for port, fp_result, analysis in _fingerprint_ports(args.target, ports, open_ports):
+    proxies, headers = _http_opts(args)
+    for port, fp_result, analysis in _fingerprint_ports(args.target, ports, open_ports,
+                                                        proxies=proxies, headers=headers):
         print(render_report(args.target, port, fp_result, analysis))
+        _save_fingerprint(args.target, port, fp_result, analysis)
 
 
 def cmd_subs(args: argparse.Namespace) -> None:
@@ -280,7 +317,8 @@ def cmd_vhost(args: argparse.Namespace) -> None:
 
 
 def cmd_passive(args: argparse.Namespace) -> None:
-    result = run_passive(args.target, args.port)
+    proxies, headers = _http_opts(args)
+    result = run_passive(args.target, args.port, proxies=proxies, headers=headers)
     out = args.output or _default_out(args.target, f"{_safe_name(args.target)}-{args.port}.passive.json")
     _save_json(result, out)
 
@@ -354,26 +392,39 @@ def cmd_graph(args: argparse.Namespace) -> None:
         host = nd.get("host") or nd.get("address") or args.target
         host_open.setdefault(host, []).extend(p["port"] for p in nd.get("ports", []))
 
+    # Saved `fingerprint`/`scan` results feed the graph without a live re-scan.
     fingerprints = []
+    seen_fp = set()
+    for path in args.fingerprint_json or []:
+        fj = _load_json_file(path)
+        if fj and "fp" in fj and "analysis" in fj:
+            host = fj.get("host") or args.target
+            fingerprints.append((host, fj.get("port"), fj["fp"], fj["analysis"]))
+            seen_fp.add((host, fj.get("port")))
+
     if not args.no_fingerprint:
         jobs = []
+        scheme_hint: dict[tuple, str] = {}
         for nd in nmaps:
             host = nd.get("host") or nd.get("address") or args.target
             for p in nd.get("ports", []):
-                if "http" in (p.get("service") or ""):
+                svc = p.get("service") or ""
+                if "http" in svc:
                     jobs.append((host, p["port"]))
+                    if "ssl" in svc or "https" in svc:
+                        scheme_hint[(host, p["port"])] = "https"
         for port in args.port or []:
             jobs.append((args.target, port))
-        uniq = list(dict.fromkeys(jobs))
+        uniq = [hp for hp in dict.fromkeys(jobs) if hp not in seen_fp]
 
         def gjob(hp):
             host, port = hp
-            fp_result = fingerprint_target(host, port)
+            fp_result = fingerprint_target(host, port, scheme=scheme_hint.get(hp))
             return host, port, fp_result, analyze(fp_result, open_ports=host_open.get(host) or [port])
 
         if uniq:
             with ThreadPoolExecutor(max_workers=min(8, len(uniq))) as pool:
-                fingerprints = list(pool.map(gjob, uniq))
+                fingerprints += list(pool.map(gjob, uniq))
 
     graph = build_graph(args.target, subs=subs, nmap=nmaps, fingerprints=fingerprints, dirs=dirs)
     out = args.output or _default_out(args.target, f"{_safe_name(args.target)}.graph.html")
@@ -384,6 +435,7 @@ def cmd_graph(args: argparse.Namespace) -> None:
 
 
 def cmd_scan(args: argparse.Namespace) -> None:
+    schemes: dict[int, str] = {}
     if args.no_nmap:
         if not args.port:
             print("! --no-nmap requires --port", file=sys.stderr)
@@ -397,12 +449,19 @@ def cmd_scan(args: argparse.Namespace) -> None:
             return
         open_ports = [p["port"] for p in nmap_data["ports"]]
         http_ports = [p["port"] for p in nmap_data["ports"] if "http" in p["service"]]
+        for p in nmap_data["ports"]:
+            svc = p.get("service") or ""
+            if "ssl" in svc or "https" in svc:
+                schemes[p["port"]] = "https"
         if not http_ports:
             print(f"{_DIM}no HTTP services found. Ports: {open_ports}{_RESET}")
             return
 
-    for port, fp_result, analysis in _fingerprint_ports(args.target, http_ports, open_ports):
+    proxies, headers = _http_opts(args)
+    for port, fp_result, analysis in _fingerprint_ports(args.target, http_ports, open_ports,
+                                                        proxies=proxies, headers=headers, schemes=schemes):
         print(render_report(args.target, port, fp_result, analysis))
+        _save_fingerprint(args.target, port, fp_result, analysis)
 
 
 _HELP_EPILOG = """\
@@ -430,8 +489,17 @@ notes:
       nmap --from-xml  ·  dirs --from-ferox  ·  vhost --from-ffuf  ·  subs --from-txt
   - dirs: -t threads, -d recursion depth, --no-recursion, Ctrl+C saves findings
   - per-path hypotheses (/login -> SQLi/brute), 30x/401/403 -> "auth-gated"
-  - output is written to the current directory; `fp <command> -h` for details
+  - fingerprint/scan save <target>-<port>.fp.json; graph reads it via --fingerprint-json
+  - --proxy / -H 'Name: value' / --cookie on scan/fingerprint/dirs/passive (Burp, auth)
+  - output is written to a per-target folder; `fp <command> -h` for details
 """
+
+
+def _add_http_opts(p: argparse.ArgumentParser) -> None:
+    p.add_argument("--proxy", help="Route requests through this HTTP proxy (e.g. http://127.0.0.1:8080 for Burp)")
+    p.add_argument("-H", "--header", action="append", metavar="'Name: value'",
+                   help="Extra request header (repeatable) — e.g. authenticated fingerprinting")
+    p.add_argument("--cookie", help="Cookie header value, e.g. 'session=abc; other=1'")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -461,18 +529,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_dirs.add_argument("--no-recursion", action="store_true", help="Disable recursion (scan top level only)")
     p_dirs.add_argument("-o", "--output", help="Where to save JSON (default <target>-<port>.dirs.json)")
     p_dirs.add_argument("--graph", action="store_true", help="Also build an HTML graph from the found paths")
+    _add_http_opts(p_dirs)
     p_dirs.set_defaults(func=cmd_dirs)
 
     p_fp = sub.add_parser("fingerprint", help="HTTP fingerprint + report for a single port")
     p_fp.add_argument("--target", required=True, help="Target host")
     p_fp.add_argument("--port", required=True, help="Target HTTP port(s), comma-separated (e.g. 80,443,8080)")
     p_fp.add_argument("--nmap-json", help="Previously saved `nmap` result - adds open ports to the analysis")
+    _add_http_opts(p_fp)
     p_fp.set_defaults(func=cmd_fingerprint)
 
     p_scan = sub.add_parser("scan", help="nmap + fingerprint in one run (combined mode)")
     p_scan.add_argument("--target", required=True, help="Target host")
     p_scan.add_argument("--port", help="Target port(s), comma-separated (e.g. 80,443,1337); restricts nmap or, with --no-nmap, fingerprinted directly")
     p_scan.add_argument("--no-nmap", action="store_true", help="Do not run nmap (requires --port)")
+    _add_http_opts(p_scan)
     p_scan.set_defaults(func=cmd_scan)
 
     p_subs = sub.add_parser("subs", help="Subdomain enumeration via subfinder + built-in liveness check (broad targets)")
@@ -498,6 +569,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_pass.add_argument("--port", type=int, required=True, help="Target HTTP port")
     p_pass.add_argument("-o", "--output", help="Where to save JSON (default <target>-<port>.passive.json)")
     p_pass.add_argument("--graph", action="store_true", help="Also build an HTML graph from discovered paths")
+    _add_http_opts(p_pass)
     p_pass.set_defaults(func=cmd_passive)
 
     p_graph = sub.add_parser("graph", help="Build the interactive HTML graph from saved results (subs/nmap/dirs/passive) + fingerprint")
@@ -506,6 +578,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_graph.add_argument("--nmap-json", action="append", help="Saved `nmap` result (repeatable; routed to its host)")
     p_graph.add_argument("--dirs-json", action="append", help="Saved `dirs` result (repeatable; routed to its host)")
     p_graph.add_argument("--passive-json", action="append", help="Saved `passive` result (repeatable; routed to its host)")
+    p_graph.add_argument("--fingerprint-json", action="append", help="Saved `fingerprint`/`scan` result (repeatable; no live re-scan)")
     p_graph.add_argument("--port", type=int, action="append", help="HTTP port on --target to fingerprint (repeatable)")
     p_graph.add_argument("--no-fingerprint", action="store_true", help="No HTTP requests - build the graph from saved data only")
     p_graph.add_argument("-o", "--output", help="Output HTML (default <target>.graph.html)")

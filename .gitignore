@@ -10,6 +10,7 @@ venv/
 # выходные артефакты сканов
 *.nmap.json
 *.dirs.json
+*.fp.json
 *.graph.html
 *.passive.json
 *.subs.json

@@ -124,9 +124,19 @@ def _classify_cors(headers_lower: dict) -> dict | None:
     }
 
 
-def _build_url(host: str, port: int, path: str = "/") -> str:
-    scheme = "https" if port in (443, 8443) else "http"
+def _build_url(host: str, port: int, path: str = "/", scheme: str | None = None) -> str:
+    if scheme is None:
+        scheme = "https" if port in (443, 8443) else "http"
     return f"{scheme}://{host}:{port}{path}"
+
+
+def _candidate_schemes(port: int, hint: str | None) -> list[str]:
+    """Scheme order to try. An explicit hint (e.g. nmap 'ssl/http') wins; otherwise
+    default by port but keep the other as a fallback for TLS on odd ports / plain
+    HTTP on 8443-style ports."""
+    if hint in ("http", "https"):
+        return [hint]
+    return ["https", "http"] if port in (443, 8443) else ["http", "https"]
 
 
 def _check_path(session: requests.Session, base_url: str, path: str) -> tuple[str, int | None]:
@@ -149,16 +159,20 @@ def _baseline_statuses(session: requests.Session, base_url: str) -> set[int]:
     return seen
 
 
-def fingerprint_target(host: str, port: int) -> dict:
+def fingerprint_target(host: str, port: int, scheme: str | None = None,
+                       proxies: dict | None = None, headers: dict | None = None) -> dict:
     session = requests.Session()
     session.headers.update({"User-Agent": "stack-fingerprinter/1.0"})
-    base_url = _build_url(host, port)
+    if headers:
+        session.headers.update(headers)
+    if proxies:
+        session.proxies.update(proxies)
 
     result = {
         "headers": {h: None for h in TRACKED_HEADERS},
         "cookies": [],
         "cookie_flags": [],
-        "secure_scheme": port in (443, 8443),
+        "secure_scheme": False,
         "waf": None,
         "cors": None,
         "deserialization": [],
@@ -169,21 +183,34 @@ def fingerprint_target(host: str, port: int) -> dict:
         "error": None,
     }
 
-    try:
-        resp = session.get(base_url + "/", timeout=TIMEOUT, verify=False, allow_redirects=False)
-        for _ in range(MAX_SAME_HOST_REDIRECTS):
-            if resp.status_code not in (301, 302, 303, 307, 308):
-                break
-            location = resp.headers.get("Location")
-            if not location:
-                break
-            absolute = urljoin(resp.url, location)
-            if urlsplit(absolute).hostname != host:
-                break
-            resp = session.get(absolute, timeout=TIMEOUT, verify=False, allow_redirects=False)
-    except requests.RequestException as exc:
-        result["error"] = f"Could not connect to {base_url}: {exc}"
+    resp = None
+    last_exc = None
+    for sch in _candidate_schemes(port, scheme):
+        base_url = _build_url(host, port, scheme=sch)
+        try:
+            resp = session.get(base_url + "/", timeout=TIMEOUT, verify=False, allow_redirects=False)
+            break
+        except requests.RequestException as exc:
+            last_exc = exc
+            continue
+    if resp is None:
+        result["error"] = f"Could not connect to {_build_url(host, port, scheme=scheme)}: {last_exc}"
         return result
+    result["secure_scheme"] = base_url.startswith("https://")
+
+    for _ in range(MAX_SAME_HOST_REDIRECTS):
+        if resp.status_code not in (301, 302, 303, 307, 308):
+            break
+        location = resp.headers.get("Location")
+        if not location:
+            break
+        absolute = urljoin(resp.url, location)
+        if urlsplit(absolute).hostname != host:
+            break
+        try:
+            resp = session.get(absolute, timeout=TIMEOUT, verify=False, allow_redirects=False)
+        except requests.RequestException:
+            break
 
     resp_headers_lower = {k.lower(): v for k, v in resp.headers.items()}
     for h in TRACKED_HEADERS:

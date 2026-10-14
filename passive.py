@@ -28,9 +28,13 @@ _ENDPOINT_RE = re.compile(r"""["'`](/[A-Za-z0-9_\-./]{2,120}(?:\?[A-Za-z0-9_\-.%
 _SCRIPT_SRC_RE = re.compile(r"""<script[^>]+src\s*=\s*['"]([^'"]+)['"]""", re.IGNORECASE)
 
 
-def _new_session() -> requests.Session:
+def _new_session(proxies: dict | None = None, headers: dict | None = None) -> requests.Session:
     s = requests.Session()
     s.headers.update({"User-Agent": "stack-fingerprinter/1.0"})
+    if headers:
+        s.headers.update(headers)
+    if proxies:
+        s.proxies.update(proxies)
     return s
 
 
@@ -77,8 +81,8 @@ def _is_interesting_endpoint(p: str) -> bool:
     return not p.split("?", 1)[0].lower().endswith(_ASSET_EXT)
 
 
-def run_passive(host: str, port: int) -> dict:
-    session = _new_session()
+def run_passive(host: str, port: int, proxies: dict | None = None, headers: dict | None = None) -> dict:
+    session = _new_session(proxies, headers)
     base = _build_url(host, port)
     result = {
         "target": base, "robots": [], "sitemap": [],

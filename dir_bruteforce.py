@@ -45,6 +45,9 @@ def run_dir_bruteforce(
     threads: int | None = None,
     depth: int | None = None,
     no_recursion: bool = False,
+    proxy: str | None = None,
+    headers: list[str] | None = None,
+    cookie: str | None = None,
     timeout: int = DEFAULT_TIMEOUT,
 ) -> dict:
 
@@ -81,6 +84,12 @@ def run_dir_bruteforce(
             cmd += ["--no-recursion"]
         elif depth is not None:
             cmd += ["-d", str(depth)]
+        if proxy:
+            cmd += ["-p", proxy]
+        for h in headers or []:
+            cmd += ["-H", h]
+        if cookie:
+            cmd += ["-b", cookie]
 
         print(f"\033[2mferoxbuster {result['target']}  ·  Ctrl+C to stop and save\033[0m")
         sys.stdout.flush()

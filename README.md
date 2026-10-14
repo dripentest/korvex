@@ -118,7 +118,16 @@ fp nmap --from-xml existing-scan.xml         # parse an existing nmap -oX file
 
 ```bash
 fp fingerprint --target target.thm --port 5000
+fp fingerprint --target target.thm --port 5000 --proxy http://127.0.0.1:8080   # through Burp
+fp fingerprint --target app.thm --port 443 -H "Authorization: Bearer <jwt>"    # behind auth
+fp fingerprint --target app.thm --port 443 --cookie "session=<cookie>"
 ```
+
+`fingerprint` and `scan` save their result as `<target>-<port>.fp.json` (so the
+whole pipeline is JSON like every other stage), pick `http`/`https` from the port
+and the nmap service (falling back to the other scheme on a connection error), and
+accept `--proxy` / `-H/--header` (repeatable) / `--cookie` to route through a proxy
+or reach authenticated areas (`dirs` and `passive` take the same flags).
 
 ```
 target.thm:5000
@@ -226,8 +235,12 @@ fp graph --target example.com \
   --passive-json app.example.com/app.example.com-443.passive.json
 ```
 
+`--fingerprint-json` feeds a saved `fingerprint`/`scan` result into the graph so it
+renders the stack/DB/CORS/deserialization findings **without a live re-scan** (pair
+with `--no-fingerprint` to stay fully offline).
+
 Merges saved results (and an optional live fingerprint) into a single self-contained HTML
-file. `--nmap-json` / `--dirs-json` / `--passive-json` are repeatable and routed to their
+file. `--nmap-json` / `--dirs-json` / `--passive-json` / `--fingerprint-json` are repeatable and routed to their
 host, so a broad target renders as one graph: the root domain, every discovered subdomain,
 each host's ports, and their paths and vulnerabilities. Open it in any browser — no server required.
 

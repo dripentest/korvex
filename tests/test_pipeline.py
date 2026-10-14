@@ -6,7 +6,8 @@ import unittest
 import main
 from analyzer import analyze, _dedup_prefixes
 from dir_bruteforce import _parse_ferox_line
-from fingerprinter import _looks_serialized, _classify_cors, _stack_detected, CORS_PROBE_ORIGIN
+from fingerprinter import (_looks_serialized, _classify_cors, _stack_detected,
+                           _candidate_schemes, _build_url, CORS_PROBE_ORIGIN)
 from graph_builder import build_graph
 from nmap_parser import parse_nmap_xml
 
@@ -74,6 +75,30 @@ class TestStackDetected(unittest.TestCase):
 
     def test_framework_cookie_detected(self):
         self.assertTrue(_stack_detected({}, ["PHPSESSID"]))
+
+
+class TestScheme(unittest.TestCase):
+    def test_hint_wins(self):
+        self.assertEqual(_candidate_schemes(8080, "https"), ["https"])
+
+    def test_default_by_port_with_fallback(self):
+        self.assertEqual(_candidate_schemes(443, None), ["https", "http"])
+        self.assertEqual(_candidate_schemes(8080, None), ["http", "https"])
+
+    def test_build_url_scheme(self):
+        self.assertEqual(_build_url("h", 8080, scheme="https"), "https://h:8080/")
+        self.assertTrue(_build_url("h", 443).startswith("https://"))
+
+
+class TestHeaderParse(unittest.TestCase):
+    def test_header_and_cookie(self):
+        h = main._parse_headers(["Authorization: Bearer x", "X-Env: dev"], "s=1; t=2")
+        self.assertEqual(h["Authorization"], "Bearer x")
+        self.assertEqual(h["X-Env"], "dev")
+        self.assertEqual(h["Cookie"], "s=1; t=2")
+
+    def test_malformed_header_skipped(self):
+        self.assertEqual(main._parse_headers(["no-colon-here"], None), {})
 
 
 class TestNmapMultiHost(unittest.TestCase):
