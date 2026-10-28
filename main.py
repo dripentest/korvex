@@ -6,17 +6,16 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import toolrunner
 from analyzer import analyze
-from dir_bruteforce import load_dir_bruteforce, run_dir_bruteforce
+from dir_bruteforce import load_dir_bruteforce
 from fingerprinter import fingerprint_target
 from graph_builder import GATED_STATUSES, build_graph
 from nmap_parser import NmapParseError, parse_nmap_xml
 from passive import passive_paths, run_passive
 from renderer import render_to_file
 from reporter import _BOLD, _DIM, _RESET, PRIORITY_COLORS, render_report
-from subs import run_subs, run_subs_from_file
-from vhost import load_vhost, run_vhost
+from subs import run_subs_from_file
+from vhost import load_vhost
 from signatures import INTERESTING_PATHS, match_path
 
 
@@ -41,33 +40,6 @@ def _parse_ports(spec) -> list[int]:
             print(f"! invalid --port value '{part}' (expected a number or a-b range)", file=sys.stderr)
             sys.exit(2)
     return out
-
-
-def run_nmap(target: str, ports: str | None) -> dict:
-    empty = {"ports": [], "os": "", "address": target}
-    if not toolrunner.has_tool("nmap"):
-        print("! nmap not found in PATH - skipping nmap scan, using HTTP only.", file=sys.stderr)
-        return empty
-
-    with toolrunner.temp_output(".xml") as tmp_path:
-        cmd = ["nmap", "-sV", "-sC", "-oX", tmp_path]
-        if ports:
-            cmd += ["-p", str(ports)]
-        cmd.append(target)
-
-        print(f"{_DIM}nmap {target}{_RESET}")
-        sys.stdout.flush()
-        err, _ = toolrunner.run(cmd, timeout=300, label="nmap")
-        if err:
-            print(f"! {err}", file=sys.stderr)
-            return empty
-        print()
-
-        try:
-            return parse_nmap_xml(tmp_path)
-        except NmapParseError as exc:
-            print(f"! could not parse nmap output: {exc}", file=sys.stderr)
-            return empty
 
 
 def _ensure_parent(path: str) -> None:
@@ -141,19 +113,12 @@ def _save_fingerprint(target: str, port: int, fp_result: dict, analysis: dict) -
 
 
 def cmd_nmap(args: argparse.Namespace) -> None:
-    if args.from_xml:
-        try:
-            nmap_data = parse_nmap_xml(args.from_xml)
-        except NmapParseError as exc:
-            print(f"! {exc}", file=sys.stderr)
-            sys.exit(1)
-        target_for_name = args.target or nmap_data.get("address") or "target"
-    else:
-        if not args.target:
-            print("! provide --target or --from-xml", file=sys.stderr)
-            sys.exit(1)
-        nmap_data = run_nmap(args.target, args.port)
-        target_for_name = args.target
+    try:
+        nmap_data = parse_nmap_xml(args.from_xml)
+    except NmapParseError as exc:
+        print(f"! {exc}", file=sys.stderr)
+        sys.exit(1)
+    target_for_name = args.target or nmap_data.get("address") or "target"
 
     nmap_data["host"] = target_for_name
     out = args.output or _default_out(target_for_name, f"{_safe_name(target_for_name)}.nmap.json")
@@ -172,24 +137,7 @@ def cmd_nmap(args: argparse.Namespace) -> None:
 
 
 def cmd_dirs(args: argparse.Namespace) -> None:
-    if args.from_ferox:
-        result = load_dir_bruteforce(args.from_ferox, args.target, args.port)
-    else:
-        if not args.wordlist:
-            print("! provide -w/--wordlist (or --from-ferox to import an existing scan)", file=sys.stderr)
-            sys.exit(1)
-        result = run_dir_bruteforce(
-            args.target,
-            args.port,
-            args.wordlist,
-            extensions=args.extensions.split(",") if args.extensions else None,
-            threads=args.threads,
-            depth=args.depth,
-            no_recursion=args.no_recursion,
-            proxy=args.proxy,
-            headers=args.header,
-            cookie=args.cookie,
-        )
+    result = load_dir_bruteforce(args.from_ferox, args.target, args.port)
 
     if result["error"] and not result["found"]:
         print(f"! {result['error']}")
@@ -285,10 +233,7 @@ def cmd_fingerprint(args: argparse.Namespace) -> None:
 
 
 def cmd_subs(args: argparse.Namespace) -> None:
-    if args.from_txt:
-        result = run_subs_from_file(args.from_txt, args.target, threads=args.threads or 40)
-    else:
-        result = run_subs(args.target, threads=args.threads or 40)
+    result = run_subs_from_file(args.from_txt, args.target, threads=args.threads or 40)
     if result["error"] and not result["live"] and not result["resolved_no_web"]:
         print(f"! {result['error']}")
         return
@@ -312,14 +257,7 @@ def cmd_subs(args: argparse.Namespace) -> None:
 
 
 def cmd_vhost(args: argparse.Namespace) -> None:
-    if args.from_ffuf:
-        result = load_vhost(args.from_ffuf, args.target, args.port, connect_host=args.ip)
-    else:
-        if not args.wordlist:
-            print("! provide -w/--wordlist (or --from-ffuf to import an existing scan)", file=sys.stderr)
-            sys.exit(1)
-        result = run_vhost(args.target, args.port, args.wordlist,
-                           connect_host=args.ip, threads=args.threads, filter_size=args.filter_size)
+    result = load_vhost(args.from_ffuf, args.target, args.port, connect_host=args.ip)
     if result["error"] and not result["found"]:
         print(f"! {result['error']}")
         return
@@ -454,84 +392,56 @@ def cmd_graph(args: argparse.Namespace) -> None:
     print(f"{_DIM}       file://{Path(out).resolve()}{_RESET}")
 
 
-def cmd_scan(args: argparse.Namespace) -> None:
-    schemes: dict[int, str] = {}
-    if args.no_nmap:
-        if not args.port:
-            print("! --no-nmap requires --port", file=sys.stderr)
-            sys.exit(1)
-        open_ports = _parse_ports(args.port)
-        http_ports = list(open_ports)
-    else:
-        nmap_data = run_nmap(args.target, args.port)
-        if not nmap_data["ports"]:
-            print(f"{_DIM}nmap found no open ports (or is unavailable){_RESET}")
-            return
-        open_ports = [p["port"] for p in nmap_data["ports"]]
-        http_ports = [p["port"] for p in nmap_data["ports"] if "http" in p["service"]]
-        for p in nmap_data["ports"]:
-            svc = p.get("service") or ""
-            if "ssl" in svc or "https" in svc:
-                schemes[p["port"]] = "https"
-        if not http_ports:
-            print(f"{_DIM}no HTTP services found. Ports: {open_ports}{_RESET}")
-            return
-
-    proxies, headers = _http_opts(args)
-    for port, fp_result, analysis in _fingerprint_ports(args.target, http_ports, open_ports,
-                                                        proxies=proxies, headers=headers, schemes=schemes):
-        print(render_report(args.target, port, fp_result, analysis))
-        _save_fingerprint(args.target, port, fp_result, analysis)
-
-
 _HELP_EPILOG = """\
-commands:
-  scan          nmap + HTTP fingerprint in one run (quick start)
-  nmap          nmap only -> JSON (ports/services/versions)
-  fingerprint   HTTP only: stack from headers/cookies, paths, vulnerabilities
-  dirs          feroxbuster only: paths + per-path hypotheses (Ctrl+C saves)
-  subs          subdomain enum (subfinder + liveness) - broad targets
-  vhost         vhost brute via ffuf (Host-header fuzzing) - boxes
+Korvex runs its own HTTP recon (fingerprint, passive) and correlates it with the
+output of tools you run yourself (nmap, feroxbuster, ffuf, subfinder) into one graph.
+
+live recon (Korvex's own, no external tools):
+  fingerprint   HTTP: stack from headers/cookies, paths, CORS/deser, vulnerabilities
   passive       robots/sitemap paths + endpoints and secrets from linked JS
-  graph         interactive HTML graph from saved nmap/dirs + fingerprint
+
+ingest a tool's output you ran yourself (normalise -> JSON):
+  nmap   --from-xml    parse an nmap -oX file
+  dirs   --from-ferox  parse a feroxbuster --json file
+  vhost  --from-ffuf   parse an ffuf -of json file
+  subs   --from-txt    liveness-check a list of subdomain names (resolve + HTTP probe)
+
+build the picture:
+  graph         interactive HTML graph from the saved JSON (subs/nmap/dirs/passive/fp)
 
 examples:
-  korvex scan        --target target.thm                       # quick: nmap + fingerprint
-  korvex scan        --target target.thm --no-nmap --port 5000 # port known, skip nmap
-  korvex fingerprint --target target.thm --port 80,443,8080    # several ports (concurrent)
-  korvex dirs        --target target.thm --port 80 -w wl.txt --graph
+  korvex fingerprint --target target.thm --port 80,443,8080    # live, several ports (concurrent)
   korvex passive     --target target.thm --port 80             # robots/sitemap/JS (no brute)
-  korvex subs        --target example.com                      # live subdomains
-  korvex graph       --target target.thm --nmap-json t.nmap.json \\
-                 --dirs-json t-80.dirs.json --fingerprint-json t-80.fp.json
 
-run a tool yourself, then import its output (use any flags you like):
+  # run tools yourself with any flags, then import their output:
   nmap -sV -sC -p- -oX s.xml target.thm
-      korvex nmap  --from-xml s.xml   --target target.thm
-  feroxbuster -u http://target.thm:80 -w wl.txt --json -o fx.json
-      korvex dirs  --from-ferox fx.json --target target.thm --port 80
+      korvex nmap  --from-xml s.xml     --target target.thm
+  feroxbuster -u http://target.thm:80 -w wl.txt --rate-limit 20 --json -o fx.json
+      korvex dirs  --from-ferox fx.json --target target.thm --port 80 --graph
   ffuf -w subs.txt:FUZZ -u http://10.10.1.5/ -H 'Host: FUZZ.target.thm' -ac -of json -o vh.json
-      korvex vhost --from-ffuf vh.json --target target.thm --port 80
+      korvex vhost --from-ffuf vh.json  --target target.thm --port 80
   subfinder -d example.com -silent -o names.txt
       korvex subs  --from-txt names.txt --target example.com
 
+  korvex graph --target target.thm --no-fingerprint \\
+               --nmap-json target.thm/target.thm.nmap.json \\
+               --dirs-json target.thm/target.thm-80.dirs.json \\
+               --fingerprint-json target.thm/target.thm-80.fp.json
+
 parameters:
-  --port VALUE     single, list or range: 80,443,1337,8000-8100  (scan/nmap/fingerprint)
+  --port VALUE     single, list or range: 80,443,1337,8000-8100  (fingerprint)
   --proxy URL      route requests through a proxy, e.g. Burp http://127.0.0.1:8080
   -H 'Name: val'   extra request header, repeatable (e.g. 'Authorization: Bearer <jwt>')
   --cookie STR     cookie header for areas behind login, e.g. 'session=abc; other=1'
-  --from-xml/-ferox/-ffuf/-txt   import an existing nmap/feroxbuster/ffuf/subfinder run
   --nmap-json      fingerprint: feed saved nmap ports into the analysis
   --fingerprint-json  graph: render a saved fingerprint without a live re-scan
   --graph          dirs/passive: also build the interactive HTML graph
-  -t / -d / --no-recursion   dirs: threads / recursion depth / disable recursion
-  -w / -x          dirs/vhost: wordlist / extensions ;  --ip -fs : vhost connect-host / size filter
 
 notes:
   - subcommands are independent; each writes JSON into a per-target folder (target.thm/)
-  - --proxy / -H / --cookie apply to scan, fingerprint, dirs and passive
+  - --proxy / -H / --cookie apply to the live commands (fingerprint, passive)
   - http/https is auto-detected from the port and the nmap service
-  - fingerprint/scan save <target>-<port>.fp.json; Ctrl+C in dirs saves partial findings
+  - fingerprint saves <target>-<port>.fp.json for the graph
   - `korvex <command> -h` for the full flag list of a command
 """
 
@@ -550,27 +460,20 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=_HELP_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    sub = parser.add_subparsers(dest="command", metavar="{scan,nmap,fingerprint,dirs,subs,vhost,passive,graph}")
+    sub = parser.add_subparsers(dest="command", metavar="{fingerprint,passive,nmap,dirs,vhost,subs,graph}")
 
-    p_nmap = sub.add_parser("nmap", help="nmap scan only, saves the result as JSON")
-    p_nmap.add_argument("--target", type=_target_arg, help="Target host")
-    p_nmap.add_argument("--port", help="Scan only these ports, comma-separated or ranges (e.g. 80,443,1337 or 8000-8100)")
-    p_nmap.add_argument("--from-xml", help="Parse an existing nmap XML instead of a live scan")
+    p_nmap = sub.add_parser("nmap", help="Import an nmap -oX file into the pipeline schema")
+    p_nmap.add_argument("--from-xml", required=True, help="nmap XML (-oX) file to parse")
+    p_nmap.add_argument("--target", type=_target_arg, help="Target host (default: from the XML)")
     p_nmap.add_argument("-o", "--output", help="Where to save JSON (default <target>.nmap.json)")
     p_nmap.set_defaults(func=cmd_nmap)
 
-    p_dirs = sub.add_parser("dirs", help="feroxbuster directory brute-force only (Ctrl+C to stop and save findings)")
+    p_dirs = sub.add_parser("dirs", help="Import a feroxbuster --json output into the pipeline schema")
+    p_dirs.add_argument("--from-ferox", required=True, help="feroxbuster --json output file to parse")
     p_dirs.add_argument("--target", type=_target_arg, required=True, help="Target host")
     p_dirs.add_argument("--port", type=int, required=True, help="Target port")
-    p_dirs.add_argument("-w", "--wordlist", help="Path to wordlist (required unless --from-ferox)")
-    p_dirs.add_argument("--from-ferox", help="Parse an existing feroxbuster --json output instead of a live scan")
-    p_dirs.add_argument("-x", "--extensions", help="Comma-separated extensions (php,html,...)")
-    p_dirs.add_argument("-t", "--threads", type=int, help="Number of feroxbuster threads")
-    p_dirs.add_argument("-d", "--depth", type=int, help="feroxbuster recursion depth (default 4; 0 = unlimited)")
-    p_dirs.add_argument("--no-recursion", action="store_true", help="Disable recursion (scan top level only)")
     p_dirs.add_argument("-o", "--output", help="Where to save JSON (default <target>-<port>.dirs.json)")
     p_dirs.add_argument("--graph", action="store_true", help="Also build an HTML graph from the found paths")
-    _add_http_opts(p_dirs)
     p_dirs.set_defaults(func=cmd_dirs)
 
     p_fp = sub.add_parser("fingerprint", help="HTTP fingerprint + report for a single port")
@@ -580,28 +483,18 @@ def build_parser() -> argparse.ArgumentParser:
     _add_http_opts(p_fp)
     p_fp.set_defaults(func=cmd_fingerprint)
 
-    p_scan = sub.add_parser("scan", help="nmap + fingerprint in one run (combined mode)")
-    p_scan.add_argument("--target", type=_target_arg, required=True, help="Target host")
-    p_scan.add_argument("--port", help="Target port(s), comma-separated (e.g. 80,443,1337); restricts nmap or, with --no-nmap, fingerprinted directly")
-    p_scan.add_argument("--no-nmap", action="store_true", help="Do not run nmap (requires --port)")
-    _add_http_opts(p_scan)
-    p_scan.set_defaults(func=cmd_scan)
-
-    p_subs = sub.add_parser("subs", help="Subdomain enumeration via subfinder + built-in liveness check (broad targets)")
+    p_subs = sub.add_parser("subs", help="Liveness-check a list of subdomain names (resolve + HTTP probe)")
+    p_subs.add_argument("--from-txt", required=True, help="File of subdomain names, one per line (e.g. a saved subfinder/amass run)")
     p_subs.add_argument("--target", type=_target_arg, required=True, help="Root domain (e.g. example.com)")
-    p_subs.add_argument("--from-txt", help="Run the liveness check over subdomain names from a file (one per line) instead of running subfinder")
     p_subs.add_argument("-t", "--threads", type=int, help="Liveness-check concurrency (default 40)")
     p_subs.add_argument("-o", "--output", help="Where to save JSON (default <target>.subs.json)")
     p_subs.set_defaults(func=cmd_subs)
 
-    p_vhost = sub.add_parser("vhost", help="Virtual-host brute-force via ffuf (Host-header fuzzing; for boxes)")
-    p_vhost.add_argument("--target", type=_target_arg, required=True, help="Base domain fuzzed in Host: FUZZ.<target> (e.g. target.thm)")
+    p_vhost = sub.add_parser("vhost", help="Import an ffuf -of json output into the pipeline schema")
+    p_vhost.add_argument("--from-ffuf", required=True, help="ffuf JSON output (-of json) file to parse")
+    p_vhost.add_argument("--target", type=_target_arg, required=True, help="Base domain (Host: FUZZ.<target>)")
     p_vhost.add_argument("--port", type=int, required=True, help="Target port")
-    p_vhost.add_argument("-w", "--wordlist", help="Path to subdomain wordlist (required unless --from-ffuf)")
-    p_vhost.add_argument("--from-ffuf", help="Parse an existing ffuf JSON output (-of json) instead of a live scan")
-    p_vhost.add_argument("--ip", type=_target_arg, help="Connect to this IP/host instead of --target")
-    p_vhost.add_argument("-t", "--threads", type=int, help="Number of ffuf threads")
-    p_vhost.add_argument("-fs", "--filter-size", type=int, help="Filter this response size (bytes); default is ffuf -ac auto-calibration")
+    p_vhost.add_argument("--ip", type=_target_arg, help="Connect-host used in the scan (for the target URL)")
     p_vhost.add_argument("-o", "--output", help="Where to save JSON (default <target>-<port>.vhost.json)")
     p_vhost.set_defaults(func=cmd_vhost)
 

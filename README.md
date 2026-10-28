@@ -1,18 +1,20 @@
 # Korvex
 
 A modular web-reconnaissance toolkit that fingerprints a target's technology
-stack, brute-forces and discovers content, correlates every finding into
-**prioritised, stack-aware attack hypotheses**, and renders the whole picture as
-an interactive attack graph.
+stack, ingests content-discovery and port-scan results, correlates every finding
+into **prioritised, stack-aware attack hypotheses**, and renders the whole picture
+as an interactive attack graph.
 
-It wraps the standard recon tools (`nmap`, `feroxbuster`, `subfinder`, `ffuf`)
-behind one consistent CLI and adds a correlation engine of **580+ signatures**
-that turns raw scan output ("here is a path, here is a header") into actionable
-leads — `/compose` on a Flask app → *server-side template injection via Jinja2*.
+Korvex runs its own HTTP recon (stack fingerprinting and passive discovery) and
+**consumes the output of the scanners you already use** (`nmap`, `feroxbuster`,
+`ffuf`, `subfinder`) — you run them with any flags you like, Korvex normalises and
+correlates their output. A correlation engine of **580+ signatures** turns raw
+findings ("here is a path, here is a header") into actionable leads — `/compose`
+on a Flask app → *server-side template injection via Jinja2*.
 
-Pure Python, one runtime dependency (`requests`); external scanners are optional
-and each can be imported from a file instead of launched. Every stage writes
-JSON, so the pipeline composes freely.
+Think of it as Grafana for pentest recon: the tools produce the data, Korvex
+correlates and visualises it. Pure Python, one runtime dependency (`requests`);
+every stage writes JSON, so the pipeline composes freely.
 
 ---
 
@@ -52,11 +54,12 @@ pip install -r requirements.txt        # only: requests
 
 - Python 3.10+
 - `requests`
-- Optional external binaries, each needed only by its command (or importable from
-  a saved file): [`nmap`](https://nmap.org),
+- No external binary is required to run Korvex itself (`fingerprint` / `passive`
+  use `requests`). To feed in scan data, run your own tools and import their
+  output: [`nmap`](https://nmap.org),
   [`feroxbuster`](https://github.com/epi052/feroxbuster),
-  [`subfinder`](https://github.com/projectdiscovery/subfinder),
-  [`ffuf`](https://github.com/ffuf/ffuf)
+  [`ffuf`](https://github.com/ffuf/ffuf),
+  [`subfinder`](https://github.com/projectdiscovery/subfinder)
 
 Optional alias so it runs from anywhere:
 
@@ -69,10 +72,18 @@ alias korvex='python3 /path/to/korvex/main.py'
 ## Quick start
 
 ```bash
-korvex scan    --target target.thm                              # stack + where to dig
-korvex dirs    --target target.thm --port 80 -w wordlist.txt    # content + per-path hypotheses
-korvex passive --target target.thm --port 80                    # robots/sitemap/JS leads
-korvex graph   --target target.thm \
+# Korvex's own live recon
+korvex fingerprint --target target.thm --port 80,443            # stack, CORS, vulns
+korvex passive     --target target.thm --port 80                # robots/sitemap/JS leads
+
+# run your own scanners with any flags, then import their output
+nmap -sV -sC -oX s.xml target.thm
+korvex nmap --from-xml s.xml --target target.thm
+feroxbuster -u http://target.thm:80 -w wordlist.txt --json -o fx.json
+korvex dirs --from-ferox fx.json --target target.thm --port 80
+
+# merge everything into one attack graph
+korvex graph --target target.thm --no-fingerprint \
            --nmap-json target.thm/target.thm.nmap.json \
            --dirs-json target.thm/target.thm-80.dirs.json \
            --fingerprint-json target.thm/target.thm-80.fp.json
@@ -87,19 +98,19 @@ those artifacts into `target.thm/target.thm.graph.html` — open it in any brows
 
 | Command | What it does |
 |---------|--------------|
-| `scan` | nmap + HTTP fingerprint in one run (quick start) |
-| `nmap` | ports / services / versions → JSON |
-| `fingerprint` | stack · DB · WAF · CORS · deserialization · sensitive paths |
-| `dirs` | content brute-force + per-path hypotheses |
-| `subs` | subdomain enumeration + liveness |
-| `vhost` | virtual-host brute-force (Host-header fuzzing) |
-| `passive` | robots/sitemap paths + endpoints & secrets from linked JS |
+| `fingerprint` | **live** — stack · DB · WAF · CORS · deserialization · sensitive paths |
+| `passive` | **live** — robots/sitemap paths + endpoints & secrets from linked JS |
+| `nmap` | import an nmap `-oX` file → JSON |
+| `dirs` | import a feroxbuster `--json` file → JSON |
+| `vhost` | import an ffuf `-of json` file → JSON |
+| `subs` | liveness-check a list of subdomain names (resolve + HTTP probe) |
 | `graph` | merge saved artifacts into an interactive attack graph |
 
-Every tool-launching command can **import** a run you made yourself
-(`--from-xml` / `--from-ferox` / `--from-ffuf` / `--from-txt`). Run `korvex -h` or
-`korvex <command> -h` for the full flags, examples (incl. `nmap` / `feroxbuster` /
-`ffuf`) and end-to-end workflows.
+`fingerprint` and `passive` make their own HTTP requests (no external tool). The
+other commands **consume** a scan you ran yourself (`--from-xml` / `--from-ferox`
+/ `--from-ffuf` / `--from-txt`) and normalise it into the pipeline's JSON schema —
+run the underlying tool with whatever flags you need (rate limits, timing,
+filters), then import. Run `korvex -h` or `korvex <command> -h` for full flags.
 
 ---
 

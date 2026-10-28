@@ -6,12 +6,10 @@ from pathlib import Path
 import requests
 import urllib3
 
-import toolrunner
 from fingerprinter import _sanitize
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-SUBFINDER_TIMEOUT = 600
 PROBE_TIMEOUT = 6
 LIVENESS_WORKERS = 40
 
@@ -41,36 +39,11 @@ def _check(sub: str) -> tuple[list[str] | None, dict | None]:
     return ips, _probe_http(sub)
 
 
-def run_subs(domain: str, timeout: int = SUBFINDER_TIMEOUT, threads: int = LIVENESS_WORKERS) -> dict:
-    result = {"domain": domain, "found": 0, "live": [], "resolved_no_web": [], "dead": 0, "error": None}
-
-    if not toolrunner.has_tool("subfinder"):
-        result["error"] = "subfinder not found in PATH"
-        print(f"! {result['error']} - install from github.com/projectdiscovery/subfinder", file=sys.stderr)
-        return result
-
-    print(f"\033[2msubfinder -d {domain}\033[0m")
-    sys.stdout.flush()
-    err, proc = toolrunner.run(["subfinder", "-d", domain, "-silent"],
-                               timeout=timeout, label="subfinder", capture=True, check=False)
-    if err:
-        result["error"] = err
-        print(f"! {result['error']}", file=sys.stderr)
-        return result
-
-    subs = sorted({_sanitize(line.strip()) for line in proc.stdout.splitlines() if line.strip()})
-    result["found"] = len(subs)
-    if not subs:
-        return result
-
-    return _classify_liveness(result, subs, threads)
-
-
 def run_subs_from_file(path: str, domain: str, threads: int = LIVENESS_WORKERS) -> dict:
     """Run the liveness check over a list of subdomain names from a file (one per
-    line — e.g. a saved `subfinder -silent` run), without launching subfinder.
-    Mirrors `nmap --from-xml`. The liveness classification is the value this
-    command adds over the raw tool, so it still runs."""
+    line — e.g. a saved `subfinder -silent` run). Enumerate subdomains yourself
+    with subfinder/amass/etc; the liveness classification (resolve + HTTP probe)
+    is the value Korvex adds over the raw name list, so it still runs here."""
     result = {"domain": domain, "found": 0, "live": [], "resolved_no_web": [], "dead": 0, "error": None}
 
     try:
