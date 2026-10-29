@@ -48,8 +48,8 @@ every stage writes JSON, so the pipeline composes freely.
 ## Install
 
 ```bash
-git clone https://github.com/dripentest/fingerprint.git
-cd fingerprint
+git clone https://github.com/dripentest/korvex.git
+cd korvex
 pip install -r requirements.txt        # only: requests
 ```
 
