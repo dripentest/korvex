@@ -8,9 +8,10 @@ as an interactive attack graph.
 Korvex runs its own HTTP recon (stack fingerprinting and passive discovery) and
 **consumes the output of the scanners you already use** (`nmap`, `feroxbuster`,
 `ffuf`, `subfinder`) — you run them with any flags you like, Korvex normalises and
-correlates their output. A correlation engine of **580+ signatures** turns raw
-findings ("here is a path, here is a header") into actionable leads — `/compose`
-on a Flask app → *server-side template injection via Jinja2*.
+correlates their output. A rule-based correlation layer (**~800 keyword, parameter
+and cookie mappings**) turns raw findings ("here is a path, here is a header") into
+prioritised leads, refined by the detected stack — `/compose` on a Flask app →
+*server-side template injection via Jinja2*.
 
 Think of it as Grafana for pentest recon: the tools produce the data, Korvex
 correlates and visualises it. Pure Python, one runtime dependency (`requests`);
@@ -20,9 +21,10 @@ every stage writes JSON, so the pipeline composes freely.
 
 ## Highlights
 
-- **Correlation engine** — path/parameter/cookie/header/port signature databases
-  map findings to prioritised hypotheses (CRITICAL → LOW), each carrying its own
-  severity.
+- **Rule-based correlation** — path/parameter/cookie/header/port mapping tables
+  (~800 entries) turn findings into prioritised hypotheses (CRITICAL → LOW), each
+  with its own hand-assigned severity. Paths are substring-matched; a small
+  stack×vuln lookup table refines generic leads for the detected stack.
 - **Stack-aware** — a hypothesis is refined by the detected stack: SSTI → Jinja2
   (Python) / Twig (PHP) / Freemarker (Java); file upload → `.php`/`.jsp`/`.aspx`;
   SQLi → NoSQL (Node).
@@ -31,9 +33,10 @@ every stage writes JSON, so the pipeline composes freely.
   deserialization leads. Two signals static rules can't express are probed live:
   **permissive CORS** (reflected/`null`/`*` origin with credentials) and
   **serialized objects in cookies** (PHP `O:`, Java `rO0`, pickle, `__VIEWSTATE`).
-- **Low-noise by design** — soft-404 / blanket-auth hosts are calibrated out,
-  path-specific findings are evidence-gated, auth-gated routes are separated, and
-  unsignatured noise collapses into a single hub node.
+- **Low-noise by design** — probes that only echo a host's catch-all status
+  (soft-404 / blanket-auth, detected by status code) are suppressed, path-specific
+  findings are evidence-gated on the path actually being present, auth-gated routes
+  are separated, and unsignatured noise collapses into a single hub node.
 - **Sensible defaults** — http/https autodetected per port and nmap service;
   `--proxy` / `-H` / `--cookie` for Burp and authenticated recon.
 - **Interactive attack graph** — one dependency-free HTML file: pan/zoom, drag,
@@ -116,11 +119,14 @@ filters), then import. Run `korvex -h` or `korvex <command> -h` for full flags.
 
 ## How it works
 
-Signature databases (`data/*.json`) map observations to stack, database and
-vulnerability candidates; the correlation engine scores stack confidence, ranks
-vulnerabilities, gates path-specific findings on actual presence, and refines
-generic hypotheses with the detected stack. The result is a node/edge graph
-rendered by a dependency-free HTML engine.
+Mapping tables (`data/*.json`) associate observations with stack, database and
+vulnerability candidates. Correlation is deliberately simple and inspectable:
+paths and parameters are substring-matched to hypotheses; stack confidence is a
+small heuristic over the number and agreement of signals (not a weighted score);
+path-specific findings are gated on the path actually being present; and generic
+hypotheses are refined for the detected stack through a lookup table. Severities
+are authored per signature, not computed. The result is a node/edge graph rendered
+by a dependency-free HTML engine.
 
 The core loop is *discovered path → `match_path()` → prioritised, stack-refined
 hypotheses → graph nodes*.
