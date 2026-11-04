@@ -7,7 +7,7 @@ venv/
 *.xml
 !data/*.xml
 
-# выходные артефакты сканов
+# scan output artifacts
 *.nmap.json
 *.dirs.json
 *.fp.json

@@ -17,6 +17,11 @@ Think of it as Grafana for pentest recon: the tools produce the data, Korvex
 correlates and visualises it. Pure Python, one runtime dependency (`requests`);
 every stage writes JSON, so the pipeline composes freely.
 
+![Korvex attack graph](assets/attack-graph.png)
+
+*Interactive attack graph (demo data): root domain → subdomains → ports → stacks →
+paths → prioritised, stack-aware vulnerability leads.*
+
 ---
 
 ## Highlights
