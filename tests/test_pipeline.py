@@ -5,7 +5,7 @@ import unittest
 
 import main
 from analyzer import analyze, _dedup_prefixes
-from dir_bruteforce import _parse_ferox_line
+from dir_bruteforce import _parse_ferox_line, _parse_url_line
 from fingerprinter import (_looks_serialized, _classify_cors, _stack_detected,
                            _candidate_schemes, _build_url, CORS_PROBE_ORIGIN)
 from graph_builder import build_graph
@@ -34,6 +34,28 @@ class TestFeroxParse(unittest.TestCase):
 
     def test_statistics_dropped(self):
         self.assertIsNone(_parse_ferox_line('{"type":"statistics","status":0}'))
+
+
+class TestUrlImport(unittest.TestCase):
+    def test_full_url_keeps_query(self):
+        e = _parse_url_line("https://app.acme.io/api/user?id=42", "app.acme.io")
+        self.assertEqual(e["path"], "/api/user?id=42")
+
+    def test_other_host_skipped(self):
+        self.assertIsNone(_parse_url_line("https://other.com/x", "app.acme.io"))
+
+    def test_bare_path_normalised(self):
+        self.assertEqual(_parse_url_line("admin/login.php", "h")["path"], "/admin/login.php")
+
+    def test_comment_and_blank_skipped(self):
+        self.assertIsNone(_parse_url_line("# comment", "h"))
+        self.assertIsNone(_parse_url_line("   ", "h"))
+
+    def test_katana_jsonl(self):
+        line = '{"request":{"endpoint":"https://h/download?file=x"},"response":{"status_code":200}}'
+        e = _parse_url_line(line, "h")
+        self.assertEqual(e["path"], "/download?file=x")
+        self.assertEqual(e["status"], 200)
 
 
 class TestSerializedDetection(unittest.TestCase):

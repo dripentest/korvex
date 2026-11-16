@@ -109,7 +109,7 @@ those artifacts into `target.thm/target.thm.graph.html` — open it in any brows
 | `fingerprint` | **live** — stack · DB · WAF · CORS · deserialization · sensitive paths |
 | `passive` | **live** — robots/sitemap paths + endpoints & secrets from linked JS |
 | `nmap` | import an nmap `-oX` file → JSON |
-| `dirs` | import a feroxbuster `--json` file → JSON |
+| `dirs` | import discovered paths — a feroxbuster `--json` file (`--from-ferox`) or a URL/endpoint list from katana/gau/waybackurls (`--from-urls`) → JSON |
 | `vhost` | import an ffuf `-of json` file → JSON |
 | `subs` | liveness-check a list of subdomain names (resolve + HTTP probe) |
 | `graph` | merge saved artifacts into an interactive attack graph |

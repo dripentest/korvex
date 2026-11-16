@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from analyzer import analyze
-from dir_bruteforce import load_dir_bruteforce
+from dir_bruteforce import load_dir_bruteforce, load_urls
 from fingerprinter import fingerprint_target
 from graph_builder import GATED_STATUSES, build_graph
 from nmap_parser import NmapParseError, parse_nmap_xml
@@ -137,7 +137,13 @@ def cmd_nmap(args: argparse.Namespace) -> None:
 
 
 def cmd_dirs(args: argparse.Namespace) -> None:
-    result = load_dir_bruteforce(args.from_ferox, args.target, args.port)
+    if args.from_urls:
+        result = load_urls(args.from_urls, args.target, args.port)
+    elif args.from_ferox:
+        result = load_dir_bruteforce(args.from_ferox, args.target, args.port)
+    else:
+        print("! provide --from-ferox or --from-urls", file=sys.stderr)
+        sys.exit(1)
 
     if result["error"] and not result["found"]:
         print(f"! {result['error']}")
@@ -403,6 +409,7 @@ live recon (Korvex's own, no external tools):
 ingest a tool's output you ran yourself (normalise -> JSON):
   nmap   --from-xml    parse an nmap -oX file
   dirs   --from-ferox  parse a feroxbuster --json file
+  dirs   --from-urls   parse a URL/endpoint list (katana, gau, waybackurls, or hand-made)
   vhost  --from-ffuf   parse an ffuf -of json file
   subs   --from-txt    liveness-check a list of subdomain names (resolve + HTTP probe)
 
@@ -418,6 +425,8 @@ examples:
       korvex nmap  --from-xml s.xml     --target target.thm
   feroxbuster -u http://target.thm:80 -w wl.txt --rate-limit 20 --json -o fx.json
       korvex dirs  --from-ferox fx.json --target target.thm --port 80 --graph
+  katana -u https://target.thm -jsonl -o crawl.jsonl   # crawl (finds param URLs)
+      korvex dirs  --from-urls crawl.jsonl --target target.thm --port 443
   ffuf -w subs.txt:FUZZ -u http://10.10.1.5/ -H 'Host: FUZZ.target.thm' -ac -of json -o vh.json
       korvex vhost --from-ffuf vh.json  --target target.thm --port 80
   subfinder -d example.com -silent -o names.txt
@@ -468,8 +477,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_nmap.add_argument("-o", "--output", help="Where to save JSON (default <target>.nmap.json)")
     p_nmap.set_defaults(func=cmd_nmap)
 
-    p_dirs = sub.add_parser("dirs", help="Import a feroxbuster --json output into the pipeline schema")
-    p_dirs.add_argument("--from-ferox", required=True, help="feroxbuster --json output file to parse")
+    p_dirs = sub.add_parser("dirs", help="Import discovered paths (feroxbuster JSON, or a URL/endpoint list)")
+    p_dirs.add_argument("--from-ferox", help="feroxbuster --json output file to parse")
+    p_dirs.add_argument("--from-urls", help="URL/endpoint list — katana -o/-jsonl, gau, waybackurls, or hand-made (one per line); query strings kept")
     p_dirs.add_argument("--target", type=_target_arg, required=True, help="Target host")
     p_dirs.add_argument("--port", type=int, required=True, help="Target port")
     p_dirs.add_argument("-o", "--output", help="Where to save JSON (default <target>-<port>.dirs.json)")
